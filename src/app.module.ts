@@ -7,7 +7,8 @@ import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
-    isGlobal: true
+    isGlobal: true,
+    envFilePath: '.env'
   }), AuthModule, UsersModule],
   controllers: [AppController],
   providers: [AppService],
