@@ -19,21 +19,21 @@ export class UsersService {
   }
 
   findOne(userId: string) {
-    const userFound = this.prisma.user.findUnique({ where: { id: userId } });
+    /*const userFound = this.prisma.user.findUnique({ where: { id: userId } });
 
     if (!userFound)
       throw new NotFoundException(`Usuario con ${userId} no encontrado`);
 
-    return userFound;
+    return userFound;*/
   }
 
   signIn(email: string) {
-    const userFound = this.prisma.user.findUnique({ where: { email: email } });
+    /*const userFound = this.prisma.user.findUnique({ where: { email: email } });
 
     if (!userFound)
       throw new NotFoundException(`Usuario no encontrado`);
 
-    return userFound;
+    return userFound;*/
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
