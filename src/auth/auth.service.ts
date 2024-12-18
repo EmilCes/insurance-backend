@@ -13,7 +13,7 @@ export class AuthService {
     async signIn(email: string, password: string): Promise<any> {
         const user = await this.usersService.signIn(email);
 
-        if (user?.password !== password) {
+        /*if (user?.password !== password) {
             throw new UnauthorizedException();
         }
 
@@ -21,7 +21,7 @@ export class AuthService {
 
         return {
             access_token: this.generateJwt(payload)
-        };
+        };*/
 
     }
 

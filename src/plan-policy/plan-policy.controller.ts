@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { PlanPolicyService } from './plan-policy.service';
 import { CreatePlanPolicyDto } from './dto/create-plan-policy.dto';
 import { UpdatePlanPolicyDto } from './dto/update-plan-policy.dto';
+import { Public } from 'src/skipAuth.decorator';
 
 @Controller('plan-policy')
 export class PlanPolicyController {
@@ -12,6 +13,7 @@ export class PlanPolicyController {
     return this.planPolicyService.create(createPlanPolicyDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.planPolicyService.findAll();
