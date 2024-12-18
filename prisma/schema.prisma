@@ -13,14 +13,135 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model User {
-  id        String    @id @default(uuid())
-  email     String @unique
-  firstName String
-  lastName  String
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model PolicyPlanStatus {
+  idPolicyPlanStatus Int    @id @default(autoincrement())
+  policyPlanStatusType String
+  
+  PolicyPlan PolicyPlan[]
 }
+
+model Service {
+  idService   Int     @id @default(autoincrement())
+  name        String
+  isCovered   Boolean
+  coveredCost Decimal
+
+  idPolicyPlan String
+  PolicyPlan PolicyPlan? @relation(fields: [idPolicyPlan], references: [idPolicyPlan])
+}
+
+model PolicyPlan {
+  idPolicyPlan      String        @id @default(uuid())
+  title             String    
+  description       String    
+  maxPeriod         Int       
+  basePrice         Decimal   
+
+  idPolicyPlanStatus Int
+  PolicyPlanStatus  PolicyPlanStatus? @relation(fields: [idPolicyPlanStatus], references: [idPolicyPlanStatus])
+
+  Service           Service[]
+  Policy            Policy[]
+}
+
+model Brand {
+  idBrand Int     @id @default(autoincrement())
+  name    String 
+
+  Model Model[]
+}
+
+
+model Model {
+  idModel Int     @id @default(autoincrement())
+  year    String
+
+  idBrand Int
+  Brand Brand? @relation(fields: [idBrand], references: [idBrand])
+
+  Vehicle Vehicle[]
+}
+
+
+model Color {
+  idColor      Int     @id @default(autoincrement())
+  vehicleColor String
+
+  Vehicle Vehicle[]
+}
+
+model Type {
+  idType      Int     @id @default(autoincrement())
+  vehicleType String
+
+  Vehicle Vehicle[]
+}
+
+model ServiceVehicle {
+  idService Int     @id @default(autoincrement())
+  name      String
+
+  Vehicle Vehicle[]
+}
+
+model Vehicle {
+  plates       String  @id 
+  serialNumberVehicle String
+  occupants    Int
+
+  idService    Int
+  ServiceVehicle ServiceVehicle? @relation(fields: [idService], references: [idService])
+
+  idType       Int
+  Type         Type?           @relation(fields: [idType], references: [idType])
+
+  idModel      Int    
+  Model        Model?          @relation(fields: [idModel], references: [idModel])
+
+  idColor      Int
+  Color        Color?          @relation(fields: [idColor], references: [idColor])
+    
+  Policy         Policy[]
+}
+
+model PolicyService {
+  idPolicyService Int     @id @default(autoincrement())
+  name            String
+  isCovered       Boolean
+  coveredCost     Decimal
+
+  serialNumber    String
+  Policy Policy? @relation(fields: [serialNumber], references: [serialNumber])
+}
+
+model Policy {
+  serialNumber  String     @id @default(uuid())
+  period        Int
+  isCanceled    Boolean
+  startDate     DateTime
+  planType      String
+  planDescription String
+
+  idUser        String
+  Driver       Driver       @relation(fields: [idUser], references: [idUser])
+
+  idPolicyPlan  String
+  PolicyPlan PolicyPlan? @relation(fields: [idPolicyPlan], references: [idPolicyPlan])
+
+  plates        String
+  Vehicle    Vehicle?    @relation(fields: [plates], references: [plates])
+  
+  PolicyService PolicyService[]
+}
+
+model Driver {
+  idUser                   String      @id @default(uuid())
+  rfc                      String
+  bankAccountNumber        String
+  expirationDateBankAccount DateTime
+  licenseNumber            String
+
+  Policy Policy[]
+}
+
 
