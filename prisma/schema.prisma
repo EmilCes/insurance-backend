@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,134 +8,199 @@ datasource db {
 }
 
 model PolicyPlanStatus {
-  idPolicyPlanStatus Int    @id @default(autoincrement())
-  policyPlanStatusType String
-  
-  PolicyPlan PolicyPlan[]
+  idPolicyPlanStatus   Int          @id @default(autoincrement())
+  policyPlanStatusType String       @db.VarChar(15)
+  PolicyPlan           PolicyPlan[]
 }
 
 model Service {
-  idService   Int     @id @default(autoincrement())
-  name        String
-  isCovered   Boolean
-  coveredCost Decimal
-
+  idService    Int        @id @default(autoincrement())
+  name         String     @db.VarChar(100)
+  isCovered    Boolean
+  coveredCost  Decimal    @db.Decimal(10, 2)
   idPolicyPlan String
-  PolicyPlan PolicyPlan? @relation(fields: [idPolicyPlan], references: [idPolicyPlan])
+  PolicyPlan   PolicyPlan @relation(fields: [idPolicyPlan], references: [idPolicyPlan])
 }
 
 model PolicyPlan {
-  idPolicyPlan      String        @id @default(uuid())
-  title             String    
-  description       String    
-  maxPeriod         Int       
-  basePrice         Decimal   
-
+  idPolicyPlan       String           @id @default(uuid())
+  title              String           @db.VarChar(30)
+  description        String           @db.VarChar(255)
+  maxPeriod          Int
+  basePrice          Decimal          @db.Decimal(10, 2)
   idPolicyPlanStatus Int
-  PolicyPlanStatus  PolicyPlanStatus? @relation(fields: [idPolicyPlanStatus], references: [idPolicyPlanStatus])
-
-  Service           Service[]
-  Policy            Policy[]
+  Policy             Policy[]
+  PolicyPlanStatus   PolicyPlanStatus @relation(fields: [idPolicyPlanStatus], references: [idPolicyPlanStatus])
+  Service            Service[]
 }
 
 model Brand {
   idBrand Int     @id @default(autoincrement())
-  name    String 
-
-  Model Model[]
+  name    String  @db.VarChar(100)
+  Model   Model[]
 }
-
 
 model Model {
-  idModel Int     @id @default(autoincrement())
-  year    String
-
+  idModel Int       @id @default(autoincrement())
+  year    String    @db.VarChar(4)
   idBrand Int
-  Brand Brand? @relation(fields: [idBrand], references: [idBrand])
-
+  Brand   Brand     @relation(fields: [idBrand], references: [idBrand])
   Vehicle Vehicle[]
 }
 
-
 model Color {
-  idColor      Int     @id @default(autoincrement())
-  vehicleColor String
-
-  Vehicle Vehicle[]
+  idColor      Int       @id @default(autoincrement())
+  vehicleColor String    @db.VarChar(40)
+  Vehicle      Vehicle[]
 }
 
 model Type {
-  idType      Int     @id @default(autoincrement())
-  vehicleType String
-
-  Vehicle Vehicle[]
+  idType      Int       @id @default(autoincrement())
+  vehicleType String    @db.VarChar(50)
+  Vehicle     Vehicle[]
 }
 
 model ServiceVehicle {
-  idService Int     @id @default(autoincrement())
-  name      String
-
-  Vehicle Vehicle[]
+  idService Int       @id @default(autoincrement())
+  name      String    @db.VarChar(100)
+  Vehicle   Vehicle[]
 }
 
 model Vehicle {
-  plates       String  @id 
-  serialNumberVehicle String
-  occupants    Int
-
-  idService    Int
-  ServiceVehicle ServiceVehicle? @relation(fields: [idService], references: [idService])
-
-  idType       Int
-  Type         Type?           @relation(fields: [idType], references: [idType])
-
-  idModel      Int    
-  Model        Model?          @relation(fields: [idModel], references: [idModel])
-
-  idColor      Int
-  Color        Color?          @relation(fields: [idColor], references: [idColor])
-    
-  Policy         Policy[]
+  plates              String         @id @db.VarChar(15)
+  serialNumberVehicle String         @db.VarChar(15)
+  occupants           Int
+  idService           Int
+  idType              Int
+  idModel             Int
+  idColor             Int
+  Policy              Policy[]
+  Color               Color          @relation(fields: [idColor], references: [idColor])
+  Model               Model          @relation(fields: [idModel], references: [idModel])
+  ServiceVehicle      ServiceVehicle @relation(fields: [idService], references: [idService])
+  Type                Type           @relation(fields: [idType], references: [idType])
 }
 
 model PolicyService {
   idPolicyService Int     @id @default(autoincrement())
-  name            String
+  name            String  @db.VarChar(100)
   isCovered       Boolean
-  coveredCost     Decimal
-
+  coveredCost     Decimal @db.Decimal(10, 2)
   serialNumber    String
-  Policy Policy? @relation(fields: [serialNumber], references: [serialNumber])
+  Policy          Policy  @relation(fields: [serialNumber], references: [serialNumber])
 }
 
 model Policy {
-  serialNumber  String     @id @default(uuid())
-  period        Int
-  isCanceled    Boolean
-  startDate     DateTime
-  planType      String
-  planDescription String
-
-  idUser        String
-  Driver       Driver       @relation(fields: [idUser], references: [idUser])
-
-  idPolicyPlan  String
-  PolicyPlan PolicyPlan? @relation(fields: [idPolicyPlan], references: [idPolicyPlan])
-
-  plates        String
-  Vehicle    Vehicle?    @relation(fields: [plates], references: [plates])
-  
-  PolicyService PolicyService[]
+  serialNumber    String          @id @default(uuid())
+  period          Int
+  isCanceled      Boolean
+  coveredCost     Decimal         @db.Decimal(10, 2)
+  startDate       DateTime
+  planTitle       String          @db.VarChar(30)
+  planDescription String          @db.VarChar(255)
+  idPolicyPlan    String
+  plates          String
+  idUser          Int
+  PolicyPlan      PolicyPlan      @relation(fields: [idPolicyPlan], references: [idPolicyPlan])
+  Driver          Driver          @relation(fields: [idUser], references: [idUser])
+  Vehicle         Vehicle         @relation(fields: [plates], references: [plates])
+  PolicyService   PolicyService[]
 }
 
 model Driver {
-  idUser                   String      @id @default(uuid())
-  rfc                      String
-  bankAccountNumber        String
+  rfc                       String   @db.VarChar(14)
+  bankAccountNumber         String   @db.VarChar(100)
   expirationDateBankAccount DateTime
-  licenseNumber            String
-
-  Policy Policy[]
+  licenseNumber             String   @db.VarChar(100)
+  phone                     String   @db.VarChar(10)
+  idUser                    Int      @id @default(autoincrement())
+  Account                   Account?
+  Policy                    Policy[]
+  Report                    Report[]  
 }
 
+model Account {
+  idAccount        Int          @id @default(autoincrement())
+  name             String       @db.VarChar(50)
+  lastName         String       @db.VarChar(50)
+  datebirth        DateTime
+  email            String       @db.VarChar(255)
+  password         String       @db.VarChar(64)
+  registrationDate DateTime
+  postalCode       String       @db.VarChar(10)
+  address          String       @db.VarChar(100)
+  idUser           Int?         @unique
+  idEmployee       Int?
+  idMunicipality   Int
+  Municipality     Municipality @relation(fields: [idMunicipality], references: [idMunicipality])
+  Driver           Driver?      @relation(fields: [idUser], references: [idUser])
+  Employee         Employee?
+}
 
+model Municipality {
+  idMunicipality   Int       @id @default(autoincrement())
+  municipalityName String    @db.VarChar(100)
+  idState          Int
+  Accounts         Account[]
+  State            State     @relation(fields: [idState], references: [idState])
+}
+
+model State {
+  idState        Int            @id @default(autoincrement())
+  stateName      String         @db.VarChar(100)
+  Municipalities Municipality[]
+}
+
+model Report {
+  idReport           Int              @id @default(autoincrement())
+  description        String           @db.Text
+  date               DateTime
+  latitude           Decimal          @db.Decimal(9, 6)
+  longitude          Decimal          @db.Decimal(10, 6)
+  result             String           @db.Text
+  reportDecisionDate DateTime
+  idStatus           Int
+  ImplicateParties   ImplicateParty[]
+  Photographs        Photograph[]
+  Status             Status           @relation(fields: [idStatus], references: [idStatus])
+  Driver             Driver[]         
+  Employee           Employee[]      
+}
+
+model Employee {
+  idEmployee     Int          @id @default(autoincrement())
+  employeeNumber Int
+  idEmployeeType Int
+  EmployeeType   EmployeeType @relation(fields: [idEmployeeType], references: [idEmployeeType])
+  Account        Account      @relation(fields: [idEmployee], references: [idAccount])
+  Reports        Report[]    
+}
+
+model EmployeeType {
+  idEmployeeType Int        @id @default(autoincrement())
+  employeeType   String     @db.VarChar(50)
+  Employees      Employee[]
+}
+
+model ImplicateParty {
+  idImplicateParty Int    @id @default(autoincrement())
+  name             String @db.VarChar(50)
+  lastName         String @db.VarChar(50)
+  idReport         Int
+  Report           Report @relation(fields: [idReport], references: [idReport])
+}
+
+model Status {
+  idStatus   Int      @id @default(autoincrement())
+  statusType String   @db.VarChar(15)
+  Reports    Report[]
+}
+
+model Photograph {
+  idPhotograph Int    @id @default(autoincrement())
+  name         String @db.VarChar(255)
+  url          Bytes
+  idReport     Int
+  Report       Report @relation(fields: [idReport], references: [idReport])
+}
+  
