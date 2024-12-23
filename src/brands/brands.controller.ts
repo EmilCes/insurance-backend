@@ -8,14 +8,14 @@ export class BrandsController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.brandsService.findAll();
+  async findAll() {
+    return await this.brandsService.findAll();
   }
 
   @Public()
-  @Get('/models/:id')
-  findModels(@Param('id') id: string) {
-    return this.brandsService.findModels(+id);
+  @Get('/models/:idModel')
+  findModels(@Param('idModel') idModel: string) {
+    return this.brandsService.findModelBrand(+idModel);
   }
 
   @Get(':id')

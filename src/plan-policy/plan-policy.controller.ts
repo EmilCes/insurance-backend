@@ -15,13 +15,14 @@ export class PlanPolicyController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.planPolicyService.findAll();
+  async findAll() {
+    return await this.planPolicyService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.planPolicyService.findOne(+id);
+  @Public()
+  @Get("/:id")
+  async findPolicy(@Param('id') id: string) {
+    return await this.planPolicyService.findPolicy(id);
   }
 
   @Patch(':id')

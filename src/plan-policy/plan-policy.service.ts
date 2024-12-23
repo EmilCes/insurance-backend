@@ -14,17 +14,38 @@ export class PlanPolicyService {
     return 'This action adds a new planPolicy';
   }
 
-  findAll() {
-    const policies = this.prisma.policyPlan.findMany();
+  async findAll() {
+    const policies = await this.prisma.policyPlan.findMany({ 
+      where: {
+        PolicyPlanStatus: {
+          policyPlanStatusType: 'Vigente'
+        }
+      },
+      include: {
+        PolicyPlanStatus: true
+      }
+    });
     if (!policies)
       throw new NotFoundException(`Policies not found`);
 
     return policies;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} planPolicy`;
+  async findPolicy(id: string) {
+    const services = await this.prisma.policyPlan.findUnique({ 
+      where: {
+        idPolicyPlan: id
+      },
+      include: {
+        Service: true
+      }
+    });
+    if (!services)
+      throw new NotFoundException(`Policy plan not found`);
+
+    return services;
   }
+
 
   update(id: number, updatePlanPolicyDto: UpdatePlanPolicyDto) {
     return `This action updates a #${id} planPolicy`;

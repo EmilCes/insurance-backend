@@ -8,8 +8,8 @@ export class BrandsService {
     private prisma: PrismaService
   ) { }
 
-  findAll() {
-    const brands = this.prisma.brand.findMany({
+  async findAll() {
+    const brands = await this.prisma.brand.findMany({
       include: {
         Model: true
       },
@@ -29,15 +29,25 @@ export class BrandsService {
     return `This action returns a #${id} brand`;
   }
 
-  findModels(id: number){
-    const brands = this.prisma.model.findMany({
-      where: { idBrand: id}
+  async findModelBrand(idModel: number){
+    const model = await this.prisma.model.findUnique({ where: { idModel : idModel }});
+    if (!model) {
+      throw new NotFoundException(`Model not found`);
+    }
+    const brand = await this.prisma.brand.findFirst({
+      select: {
+        idBrand: true,
+        name: true,
+        Model: {
+          where: {idModel : idModel}
+        }
+      }
     });
-    if (!brands) {
-      throw new NotFoundException(`Models not found`);
+    if (!brand) {
+      throw new NotFoundException(`Brand not found`);
     }
     
-    return brands;
+    return brand;
   }
 
 }
