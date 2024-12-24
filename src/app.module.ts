@@ -7,12 +7,13 @@ import { UsersModule } from './users/users.module';
 import { PlanPolicyModule } from './plan-policy/plan-policy.module';
 import { BrandsModule } from './brands/brands.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
+import { PoliciesModule } from './policies/policies.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
     envFilePath: '.env'
-  }), AuthModule, UsersModule, PlanPolicyModule, BrandsModule, VehiclesModule],
+  }), AuthModule, UsersModule, PlanPolicyModule, BrandsModule, VehiclesModule, PoliciesModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -118,7 +118,7 @@ model Policy {
   serialNumber  String     @id @default(uuid())
   period        Int
   isCanceled    Boolean
-  startDate     DateTime
+  startDate     DateTime @default(now()) @db.Timestamptz(6)
   planType      String
   planDescription String
 
