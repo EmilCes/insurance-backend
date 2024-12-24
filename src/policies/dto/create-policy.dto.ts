@@ -1,11 +1,14 @@
 export class CreatePolicyDto {
-    period: number;
-    isCanceled: boolean;
-    startDate: string;
-    planType: string;
-    planDescription: string;
-    idUser: string;
-    idPolicyPlan: string; 
+    idBrand: number;
+    idModel: number;
+    series: string;
     plates: string;
-
+    idColor: number;
+    idType: number;
+    occupants: number;
+    idService: number;
+    yearOfPolicy: number;
+    idPolicyPlan: string;
+    phoneNumber: string;
+    perMonthsPayment: number;
 }
