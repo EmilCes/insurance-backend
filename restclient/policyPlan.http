@@ -1,0 +1,43 @@
+@token = 
+
+//Authorization: Bearer {{token}}
+
+###
+
+GET http://localhost:3002/policy-plan
+Authorization: Bearer {{token}}
+
+
+### Error 500 si no se tienen los policyplan STATUS
+POST http://localhost:3002/policy-plan
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "tituloPolicy",
+    "description": "tituloPolicy",
+    "maxPeriod": 1,
+    "basePrice":  10.50
+}
+
+    
+###
+
+PATCH http://localhost:3002/policy-plan/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "titulo",
+    "description": "description",
+    "maxPeriod": 1,
+    "basePrice":  10.50,
+    "idPolicyPlanStatus": 1
+}
+
+### NO TIENE PUT
+
+##
+
+DELETE http://localhost:3002/policy-plan/1
+Authorization: Bearer {{token}}
