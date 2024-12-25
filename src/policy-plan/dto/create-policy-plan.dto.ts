@@ -3,5 +3,9 @@ export class CreatePolicyPlanDto {
     description: string;
     maxPeriod: number;
     basePrice: number;
-    idPolicyPlanStatus: number;
+    service: {
+        name: string;
+        isCovered: boolean;
+        coveredCost: number;
+    }[];
 }

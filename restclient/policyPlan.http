@@ -8,15 +8,53 @@ GET http://localhost:3002/policy-plan
 Authorization: Bearer {{token}}
 
 
-### Error 500 si no se tienen los policyplan STATUS
+### Created
 POST http://localhost:3002/policy-plan
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "title": "tituloPolicy",
-    "description": "tituloPolicy",
-    "maxPeriod": 1,
+    "title": "tituloPolicyService2",
+    "description": "tituloPolicyService2",
+    "maxPeriod": 12,
+    "basePrice":  10.50,
+    "service": [
+        {
+            "name": "Service1",
+            "isCovered": false,
+            "coveredCost": 50.00
+        },
+        {
+            "name": "Service2",
+            "isCovered": true,
+            "coveredCost": 0.00
+        }
+    ]
+}
+
+
+### Error
+POST http://localhost:3002/policy-plan
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "tituloPolicyService",
+    "description": "tituloPolicyService",
+    "maxPeriod": 12,
+    "basePrice":  10.50
+}
+
+
+### Error Guard
+POST http://localhost:3002/policy-plan
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "12345678901234567890123456789012345678901234567890",
+    "description": "tituloPolicy5",
+    "maxPeriod": 12,
     "basePrice":  10.50
 }
 

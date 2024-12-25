@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, BadRequestException, UseGuards } from '@nestjs/common';
 import { PolicyPlanService } from './policy-plan.service';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
 import { Public } from 'src/skipAuth.decorator';
+import { PolicyPlanGuard } from './policy-plan.guard';
 
 @Controller('policy-plan')
 export class PolicyPlanController {
@@ -10,19 +11,17 @@ export class PolicyPlanController {
   
   @Public()
   @Post()
-  create(@Body() createPolicyPlanDto: CreatePolicyPlanDto) {
-    return this.policyPlanService.create(createPolicyPlanDto);
+  @UseGuards(PolicyPlanGuard)
+  async create(@Body() createPolicyPlanDto: CreatePolicyPlanDto) {
+    try {
+      const nuevaPlanPoliza = await this.policyPlanService.create(createPolicyPlanDto);
+      return nuevaPlanPoliza;
+    } catch (error) {
+      //Mismo titulo, Poner mensajes de eeror especializados?
+      throw new BadRequestException("Error Bad Request")
+    }
   }
-/*
-  @Post()
-  async create(@Body() createPolicyPlanDto: CreatePolicyPlanDto, @Res() res: Response,) {
-    const newPolicyPlan = await this.policyPlanService.create(createPolicyPlanDto);
-    return res.status(HttpStatus.CREATED).json({
-      message: 'Plan de poliza creada',
-      data: newPolicyPlan
-    });
-  }
-*/
+
   @Public()
   @Get()
   findAll() {

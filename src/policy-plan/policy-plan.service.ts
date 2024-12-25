@@ -1,24 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class PolicyPlanService {
-  constructor(private prisma: PrismaService) {}
-  
+  constructor(private prisma: PrismaService) { }
+
   async create(createPolicyPlanDto: CreatePolicyPlanDto) {
-    
-    const newPolicyPlan = await this.prisma.policyPlan.create({
-      data: {
-        title: createPolicyPlanDto.title,
-        description: createPolicyPlanDto.description,
-        maxPeriod: createPolicyPlanDto.maxPeriod,
-        basePrice: createPolicyPlanDto.basePrice,
-        idPolicyPlanStatus: 1        
-      },
-    });
-    return newPolicyPlan;
+      const newPolicyPlan = await this.prisma.policyPlan.create({
+        data: {
+          title: createPolicyPlanDto.title,
+          description: createPolicyPlanDto.description,
+          maxPeriod: createPolicyPlanDto.maxPeriod,
+          basePrice: createPolicyPlanDto.basePrice,
+          idPolicyPlanStatus: 1,
+          Service: {
+            create: createPolicyPlanDto.service.map(service => ({
+              name: service.name,
+              isCovered: service.isCovered,
+              coveredCost: service.coveredCost,
+            })),
+          },
+        },
+        include: { Service: true }, 
+      });
+      
+      return newPolicyPlan;
   }
 
   findAll() {
