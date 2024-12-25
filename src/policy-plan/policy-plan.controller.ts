@@ -30,6 +30,7 @@ export class PolicyPlanController {
 
   @Public()
   @Get(':id')
+  @UseGuards(PolicyPlanGuard)
   findOne(@Param('id') id: string) {
     return this.policyPlanService.findOne(+id);
   }
