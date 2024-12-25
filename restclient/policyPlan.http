@@ -7,6 +7,9 @@
 GET http://localhost:3002/policy-plan
 Authorization: Bearer {{token}}
 
+###
+GET http://localhost:3002/policy-plan/1
+Authorization: Bearer {{token}}
 
 ### Created
 POST http://localhost:3002/policy-plan
@@ -14,8 +17,8 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "title": "tituloPolicyService2",
-    "description": "tituloPolicyService2",
+    "title": "Ejemplo",
+    "description": "Ejemplo",
     "maxPeriod": 12,
     "basePrice":  10.50,
     "service": [
