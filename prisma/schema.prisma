@@ -92,7 +92,8 @@ model PolicyService {
 
 model Policy {
   serialNumber    String          @id @default(uuid())
-  period          Int
+  monthsOfPayment Int
+  yearsPolicy     Int
   isCanceled      Boolean
   coveredCost     Decimal         @db.Decimal(10, 2)
   startDate       DateTime
@@ -116,7 +117,7 @@ model Driver {
   idUser                    Int      @id @default(autoincrement())
   Account                   Account?
   Policy                    Policy[]
-  Report                    Report[]  
+  Report                    Report[]
 }
 
 model Account {
@@ -163,8 +164,8 @@ model Report {
   ImplicateParties   ImplicateParty[]
   Photographs        Photograph[]
   Status             Status           @relation(fields: [idStatus], references: [idStatus])
-  Driver             Driver[]         
-  Employee           Employee[]      
+  Driver             Driver[]
+  Employee           Employee[]
 }
 
 model Employee {
@@ -173,7 +174,7 @@ model Employee {
   idEmployeeType Int
   EmployeeType   EmployeeType @relation(fields: [idEmployeeType], references: [idEmployeeType])
   Account        Account      @relation(fields: [idEmployee], references: [idAccount])
-  Reports        Report[]    
+  Reports        Report[]
 }
 
 model EmployeeType {
@@ -203,4 +204,3 @@ model Photograph {
   idReport     Int
   Report       Report @relation(fields: [idReport], references: [idReport])
 }
-  

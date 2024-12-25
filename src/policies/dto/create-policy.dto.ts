@@ -9,6 +9,5 @@ export class CreatePolicyDto {
     idService: number;
     yearOfPolicy: number;
     idPolicyPlan: string;
-    phoneNumber: string;
     perMonthsPayment: number;
 }

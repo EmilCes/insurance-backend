@@ -97,7 +97,8 @@ CREATE TABLE "PolicyService" (
 -- CreateTable
 CREATE TABLE "Policy" (
     "serialNumber" TEXT NOT NULL,
-    "period" INTEGER NOT NULL,
+    "monthsOfPayment" INTEGER NOT NULL,
+    "yearsPolicy" INTEGER NOT NULL,
     "isCanceled" BOOLEAN NOT NULL,
     "coveredCost" DECIMAL(10,2) NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL,

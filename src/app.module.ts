@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { PlanPolicyModule } from './plan-policy/plan-policy.module';
 import { BrandsModule } from './brands/brands.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { PoliciesModule } from './policies/policies.module';
@@ -14,7 +13,7 @@ import { PolicyPlanModule } from './policy-plan/policy-plan.module';
   imports: [ConfigModule.forRoot({
     isGlobal: true,
     envFilePath: '.env'
-  }), AuthModule, UsersModule, PlanPolicyModule, BrandsModule, VehiclesModule, PoliciesModule, PolicyPlanModule],
+  }), AuthModule, UsersModule, BrandsModule, VehiclesModule, PoliciesModule, PolicyPlanModule],
   controllers: [AppController],
   providers: [AppService],
 })

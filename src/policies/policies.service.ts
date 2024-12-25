@@ -55,7 +55,8 @@ export class PoliciesService {
 
         const policy = await this.prisma.policy.create({
           data: {
-            period: createPolicyDto.perMonthsPayment,
+            monthsOfPayment: createPolicyDto.perMonthsPayment,
+            yearsPolicy: createPolicyDto.yearOfPolicy,
             isCanceled: false,
             coveredCost: new Prisma.Decimal(+policyPlan.basePrice * createPolicyDto.yearOfPolicy),
             startDate: new Date(),

@@ -7,8 +7,8 @@ import { PolicyPlanGuard } from './policy-plan.guard';
 
 @Controller('policy-plan')
 export class PolicyPlanController {
-  constructor(private readonly policyPlanService: PolicyPlanService) {}
-  
+  constructor(private readonly policyPlanService: PolicyPlanService) { }
+
   @Public()
   @Post()
   @UseGuards(PolicyPlanGuard)
@@ -23,15 +23,15 @@ export class PolicyPlanController {
   }
 
   @Public()
-  @Get()
-  findAll() {
-    return this.policyPlanService.findAll();
+  @Get("/current")
+  async findAll() {
+    return await this.policyPlanService.findAllCurrent();
   }
 
   @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.policyPlanService.findOne(+id);
+  findOnePlanPolicy(@Param('id') id: string) {
+    return this.policyPlanService.findPlanPolicy(id);
   }
 
   @Public()
