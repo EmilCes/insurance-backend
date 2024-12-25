@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
+import { BrandModel } from './entities/brandModel.entity';
 
 
 @Injectable()
@@ -46,8 +47,9 @@ export class BrandsService {
     if (!brand) {
       throw new NotFoundException(`Brand not found`);
     }
-    
-    return brand;
+
+    const brandModel: BrandModel = { idBrand: brand.idBrand, name: brand.name, year: model.year};    
+    return brandModel;
   }
 
 }
