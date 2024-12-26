@@ -1,6 +1,5 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePolicyDto } from './dto/create-policy.dto';
-import { UpdatePolicyDto } from './dto/update-policy.dto';
 import { PrismaService } from 'src/prisma.service';
 import { Prisma } from '@prisma/client';
 import { VehiclesService } from 'src/vehicles/vehicles.service';
@@ -88,19 +87,25 @@ export class PoliciesService {
     return policyCreated;
   }
 
-  findAll() {
-    return `This action returns all policies`;
+  async findAll(page: number) {
+    const numberPoliciesPerPage = 2;
+    const policies = await this.prisma.policy.findMany({
+      where: { idUser: 1},
+      take: numberPoliciesPerPage,
+      skip: ((page - 1) * numberPoliciesPerPage)
+    });
+
+    if(policies.length <= 0){
+      return null;
+    }
+    return policies;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} policy`;
+  async findOne(id: string) {
+    const policy = await this.prisma.policy.findUnique({
+      where: { serialNumber: id}
+    });
+    return policy;
   }
 
-  update(id: number, updatePolicyDto: UpdatePolicyDto) {
-    return `This action updates a #${id} policy`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} policy`;
-  }
 }

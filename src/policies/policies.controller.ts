@@ -1,36 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException, ParseIntPipe, ValidationPipe, ParseUUIDPipe } from '@nestjs/common';
 import { PoliciesService } from './policies.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
-import { UpdatePolicyDto } from './dto/update-policy.dto';
 import { Public } from 'src/skipAuth.decorator';
 
 @Controller('policies')
 export class PoliciesController {
-  constructor(private readonly policiesService: PoliciesService) {}
+  constructor(private readonly policiesService: PoliciesService) { }
 
   @Public()
   @Post()
-  async create(@Body() createPolicyDto: CreatePolicyDto) {
+  async create(@Body(ValidationPipe) createPolicyDto: CreatePolicyDto) {
     return await this.policiesService.create(createPolicyDto);
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.policiesService.findAll();
+  async findAll(@Query("page", ParseIntPipe) query: number) {
+    const policies = await this.policiesService.findAll(query);
+    if (policies) {
+      return policies;
+    }
+    throw new NotFoundException("Policies not found");
   }
 
+  @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.policiesService.findOne(+id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const policy = await this.policiesService.findOne(id);
+    if (policy) {
+      return policy;
+    }
+    throw new NotFoundException("Policy not found");
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePolicyDto: UpdatePolicyDto) {
-    return this.policiesService.update(+id, updatePolicyDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.policiesService.remove(+id);
-  }
 }
