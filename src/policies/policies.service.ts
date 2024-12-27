@@ -13,7 +13,7 @@ export class PoliciesService {
 
   async create(createPolicyDto: CreatePolicyDto) {
     //Recuperar usuario
-    
+
     const plates = await this.vehicleService.validatePlates(createPolicyDto.plates);
     if (plates) {
       throw new ConflictException("Plates found");
@@ -83,27 +83,75 @@ export class PoliciesService {
     } catch (err) {
       throw new BadRequestException("Error creating the policy");
     }
-    
+
     return policyCreated;
   }
 
   async findAll(page: number) {
-    const numberPoliciesPerPage = 2;
+    const numberPoliciesPerPage = 4;
     const policies = await this.prisma.policy.findMany({
-      where: { idUser: 1},
+      where: { idUser: 1 },
+      select: {
+        serialNumber: true, planTitle: true, startDate: true, yearsPolicy: true, isCanceled: true,
+        Vehicle: {
+          select: {
+            Model: {
+              select: {
+                year: true,
+                Brand: { select: { name: true } }
+              }
+            }
+          }
+        }
+      },
       take: numberPoliciesPerPage,
       skip: ((page - 1) * numberPoliciesPerPage)
     });
 
-    if(policies.length <= 0){
+    if (policies.length <= 0) {
       return null;
     }
     return policies;
   }
 
+  async findAllTotal() {
+    const policies = await this.prisma.policy.count({ where: { idUser: 1}});
+
+    return policies;
+  }
+
+
   async findOne(id: string) {
     const policy = await this.prisma.policy.findUnique({
-      where: { serialNumber: id}
+      where: { serialNumber: id },
+      include: {
+        Driver: {
+          select: {
+            rfc: true,
+            Account: {
+              select: {
+                name: true, lastName: true, postalCode: true, address: true,
+                Municipality: {
+                  select: {
+                    municipalityName: true,
+                    State: { select: { stateName: true } }
+                  }
+                }
+              }
+            }
+          }
+        },
+        Vehicle: {
+          select: {
+            plates: true, serialNumberVehicle: true, occupants: true,
+            ServiceVehicle: { select: { name: true } },
+            Type: { select: { vehicleType: true } },
+            Color: { select: { vehicleColor: true } },
+            Model: { select: { year: true, Brand: { select: { name: true } } } }
+          }
+        },
+        PolicyService: { select: { name: true, isCovered: true, coveredCost: true } }
+      }
     });
     return policy;
   }

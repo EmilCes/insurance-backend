@@ -24,6 +24,12 @@ export class PoliciesController {
   }
 
   @Public()
+  @Get("/total")
+  async findAllTotal() {
+    return await this.policiesService.findAllTotal();
+  }
+
+  @Public()
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const policy = await this.policiesService.findOne(id);
