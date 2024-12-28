@@ -16,8 +16,13 @@ export class AuthService {
         if (user?.password !== password) {
             throw new UnauthorizedException();
         }
-
-        const payload = { sub: user.idAccount, username: user.email };
+        
+        const role = (user.idEmployee ? await this.usersService.getTypeEmployee(user.idEmployee) : "Conductor");
+        if(!role){
+            throw new UnauthorizedException();
+        }
+        
+        const payload = { sub: user.idAccount, username: user.email, role: role };
 
         return {
             access_token: this.generateJwt(payload)

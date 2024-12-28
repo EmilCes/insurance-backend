@@ -1,9 +1,15 @@
 import { PrismaClient } from "@prisma/client";
-import { state, municipality, drivers, account, colors, type, serviceVehicle, policyPlanStatus, policyPlans, policyPlansServices, brands, models } from "./modelsSeed";
+import { state, municipality, drivers, account, colors, type, serviceVehicle, policyPlanStatus, policyPlans, policyPlansServices, brands, models, employeeType } from "./modelsSeed";
 
 const prisma = new PrismaClient();
 
 async function main() {
+    for (let item of employeeType) {
+        await prisma.employeeType.create({
+            data: item,
+        });
+    }
+
     for (let item of brands) {
         await prisma.brand.create({
             data: item,

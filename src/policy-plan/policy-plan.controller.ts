@@ -4,6 +4,7 @@ import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
 import { Public } from 'src/skipAuth.decorator';
 import { PolicyPlanGuard } from './policy-plan.guard';
+import { RoleDriver } from 'src/roleAuth.decorator';
 
 @Controller('policy-plan')
 export class PolicyPlanController {
@@ -22,6 +23,7 @@ export class PolicyPlanController {
     }
   }
 
+  @RoleDriver()
   @Get("/current")
   async findAll() {
     try {

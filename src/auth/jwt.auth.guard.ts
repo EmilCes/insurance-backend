@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/skipAuth.decorator';
+import { IS_ADJUSTER_KEY, IS_ADMIN_KEY, IS_DRIVER_KEY, IS_SUPPORT_EXECUTIVE_KEY } from 'src/roleAuth.decorator';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -34,6 +35,11 @@ export class JwtAuthGuard implements CanActivate {
 
             const userRole = payload.role;
 
+            const hasCorrectRole = this.userHasSpecifiedRole(userRole, context);
+            if(!hasCorrectRole){
+                throw new UnauthorizedException();
+            }
+
             const expirationTime = payload.exp * 1000;
             const currentTime = Date.now();
             const timeUntilExpiration = expirationTime - currentTime;
@@ -48,5 +54,44 @@ export class JwtAuthGuard implements CanActivate {
         } catch (error) {
             throw new UnauthorizedException('Invalid token');
         }
+    }
+
+    userHasSpecifiedRole(userRole: string, context: ExecutionContext) {
+        const needsRoleDriver = this.reflector.getAllAndOverride<boolean>(IS_DRIVER_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (needsRoleDriver && userRole == "Conductor") {
+            return true;
+        }
+
+        const needsRoleAdjuster = this.reflector.getAllAndOverride<boolean>(IS_ADJUSTER_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (needsRoleAdjuster && userRole == "Ajustador") {
+            return true;
+        }
+
+        const needsRoleSupportExecutive = this.reflector.getAllAndOverride<boolean>(IS_SUPPORT_EXECUTIVE_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (needsRoleSupportExecutive && userRole == "Ejecutivo de asistencia") {
+            return true;
+        }
+
+        const needsRoleAdmin = this.reflector.getAllAndOverride<boolean>(IS_ADMIN_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (needsRoleAdmin && userRole == "Administrador") {
+            return true;
+        }
+
+        if(!needsRoleAdjuster && !needsRoleDriver && !needsRoleAdmin && !needsRoleSupportExecutive){
+            return true;
+        }
+        return false;
     }
 }

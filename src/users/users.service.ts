@@ -35,6 +35,17 @@ export class UsersService {
     return userFound;
   }
 
+  async getTypeEmployee(idEmployee: number) {
+    const employeeType = await this.prisma.employee.findUnique({
+      select: { EmployeeType: { select: { employeeType: true }}},
+      where: { idEmployee: idEmployee }
+    });
+    if (!employeeType)
+      throw new NotFoundException(`Empleado no encontrado`);
+
+    return employeeType.EmployeeType.employeeType;
+  }
+
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }

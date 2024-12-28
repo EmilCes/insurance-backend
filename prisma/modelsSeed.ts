@@ -1,3 +1,10 @@
+export const employeeType = [
+    {idEmployeeType: 1, employeeType: "Administrador" },
+    {idEmployeeType: 2, employeeType: "Ejecutivo de asistencia" },
+    {idEmployeeType: 3, employeeType: "Ajustador" }
+]
+
+
 export const state = [
     {idState: 1, stateName: "Veracruz" }
 ]

@@ -2,11 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundExcep
 import { PoliciesService } from './policies.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { Public } from 'src/skipAuth.decorator';
+import { RoleAdjuster, RoleDriver } from 'src/roleAuth.decorator';
 
 @Controller('policies')
 export class PoliciesController {
   constructor(private readonly policiesService: PoliciesService) { }
 
+  @RoleDriver()
   @Post()
   async create(@Body(ValidationPipe) createPolicyDto: CreatePolicyDto) {
     try {
@@ -20,6 +22,7 @@ export class PoliciesController {
     }
   }
 
+  @RoleDriver()
   @Put("/cancel/:id")
   @HttpCode(204)
   async cancelPolicy(@Param("id", ParseUUIDPipe) idPolicy: string) {
@@ -55,6 +58,7 @@ export class PoliciesController {
 
   }
 
+  @RoleDriver()
   @Get("/total")
   async findAllTotal() {
     try {
