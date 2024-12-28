@@ -78,7 +78,10 @@ export class PoliciesService {
             },
           });
         }
-        policyCreated = policy;
+        policyCreated = {
+          serialNumber: policy.serialNumber, planTitle: policy.planTitle,
+          planDescription: policy.planDescription
+        };
       })
     } catch (err) {
       throw new BadRequestException("Error creating the policy");
@@ -115,7 +118,7 @@ export class PoliciesService {
   }
 
   async findAllTotal() {
-    const policies = await this.prisma.policy.count({ where: { idUser: 1}});
+    const policies = await this.prisma.policy.count({ where: { idUser: 1 } });
 
     return policies;
   }

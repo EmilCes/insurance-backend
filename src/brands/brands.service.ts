@@ -35,19 +35,7 @@ export class BrandsService {
       where: { idModel : idModel },
       select: { year: true, Brand: true }
     });
-    /*const model = await this.prisma.model.findUnique({ where: { idModel : idModel }});
-    if (!model) {
-      throw new NotFoundException(`Model not found`);
-    }
-    const brand = await this.prisma.brand.findFirst({
-      select: {
-        idBrand: true,
-        name: true,
-        Model: {
-          where: {idModel : idModel}
-        }
-      }
-    });*/
+    
     if (!modelBrand) {
       throw new NotFoundException(`Brand or Model not found`);
     }
