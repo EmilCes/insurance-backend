@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, BadRequestException, UseGuards, NotFoundException, HttpException, UnprocessableEntityException } from '@nestjs/common';
 import { PolicyPlanService } from './policy-plan.service';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
@@ -11,7 +11,7 @@ export class PolicyPlanController {
 
   @Public()
   @Post()
-  @UseGuards(PolicyPlanGuard)
+  //@UseGuards(PolicyPlanGuard)
   async create(@Body() createPolicyPlanDto: CreatePolicyPlanDto) {
     try {
       const nuevaPlanPoliza = await this.policyPlanService.create(createPolicyPlanDto);
@@ -25,13 +25,34 @@ export class PolicyPlanController {
   @Public()
   @Get("/current")
   async findAll() {
-    return await this.policyPlanService.findAllCurrent();
+    try {
+      const policies = await this.policyPlanService.findAllCurrent();
+      if (!policies)
+        throw new NotFoundException(`Policies plans not found`);
+      return policies;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw new HttpException(err.message, err.getStatus());
+      }
+      throw new UnprocessableEntityException("Error getting the current plans");
+    }
   }
 
   @Public()
   @Get(':id')
-  findOnePlanPolicy(@Param('id') id: string) {
-    return this.policyPlanService.findPlanPolicy(id);
+  async findOnePlanPolicy(@Param('id') id: string) {
+    try {
+      const policyPlans = await this.policyPlanService.findPlanPolicy(id);
+      if (!policyPlans)
+        throw new NotFoundException(`Policy plan not found`);
+
+      return policyPlans;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw new HttpException(err.message, err.getStatus());
+      }
+      throw new UnprocessableEntityException("Error getting the policy plan");
+    }
   }
 
   @Public()

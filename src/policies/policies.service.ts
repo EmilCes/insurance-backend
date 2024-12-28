@@ -11,6 +11,7 @@ export class PoliciesService {
     private vehicleService: VehiclesService
   ) { }
 
+
   async create(createPolicyDto: CreatePolicyDto) {
     //Recuperar usuario
 
@@ -38,54 +39,50 @@ export class PoliciesService {
 
     let policyCreated = null;
 
-    try {
-      await this.prisma.$transaction(async (prisma) => {
-        const policyVehicle = await this.prisma.vehicle.create({
-          data: {
-            plates: createPolicyDto.plates,
-            serialNumberVehicle: createPolicyDto.series,
-            occupants: createPolicyDto.occupants,
-            idService: createPolicyDto.idService,
-            idType: createPolicyDto.idType,
-            idModel: createPolicyDto.idModel,
-            idColor: createPolicyDto.idColor
-          }
-        });
+    await this.prisma.$transaction(async (prisma) => {
+      const policyVehicle = await this.prisma.vehicle.create({
+        data: {
+          plates: createPolicyDto.plates,
+          serialNumberVehicle: createPolicyDto.series,
+          occupants: createPolicyDto.occupants,
+          idService: createPolicyDto.idService,
+          idType: createPolicyDto.idType,
+          idModel: createPolicyDto.idModel,
+          idColor: createPolicyDto.idColor
+        }
+      });
 
-        const policy = await this.prisma.policy.create({
+      const policy = await this.prisma.policy.create({
+        data: {
+          monthsOfPayment: createPolicyDto.perMonthsPayment,
+          yearsPolicy: createPolicyDto.yearOfPolicy,
+          isCanceled: false,
+          coveredCost: new Prisma.Decimal(+policyPlan.basePrice * createPolicyDto.yearOfPolicy),
+          startDate: new Date(),
+          planTitle: policyPlan.title,
+          planDescription: policyPlan.description,
+          idPolicyPlan: policyPlan.idPolicyPlan,
+          plates: createPolicyDto.plates,
+          idUser: 1
+        },
+      });
+
+      for (let index = 0; index < policyPlan.Service.length; index++) {
+        const service = policyPlan.Service[index];
+        const policyService = await this.prisma.policyService.create({
           data: {
-            monthsOfPayment: createPolicyDto.perMonthsPayment,
-            yearsPolicy: createPolicyDto.yearOfPolicy,
-            isCanceled: false,
-            coveredCost: new Prisma.Decimal(+policyPlan.basePrice * createPolicyDto.yearOfPolicy),
-            startDate: new Date(),
-            planTitle: policyPlan.title,
-            planDescription: policyPlan.description,
-            idPolicyPlan: policyPlan.idPolicyPlan,
-            plates: createPolicyDto.plates,
-            idUser: 1
+            name: service.name,
+            isCovered: service.isCovered,
+            coveredCost: service.coveredCost,
+            serialNumber: policy.serialNumber
           },
         });
-
-        for (let index = 0; index < policyPlan.Service.length; index++) {
-          const service = policyPlan.Service[index];
-          const policyService = await this.prisma.policyService.create({
-            data: {
-              name: service.name,
-              isCovered: service.isCovered,
-              coveredCost: service.coveredCost,
-              serialNumber: policy.serialNumber
-            },
-          });
-        }
-        policyCreated = {
-          serialNumber: policy.serialNumber, planTitle: policy.planTitle,
-          planDescription: policy.planDescription
-        };
-      })
-    } catch (err) {
-      throw new BadRequestException("Error creating the policy");
-    }
+      }
+      policyCreated = {
+        serialNumber: policy.serialNumber, planTitle: policy.planTitle,
+        planDescription: policy.planDescription
+      };
+    })
 
     return policyCreated;
   }
@@ -119,7 +116,6 @@ export class PoliciesService {
 
   async findAllTotal() {
     const policies = await this.prisma.policy.count({ where: { idUser: 1 } });
-
     return policies;
   }
 
@@ -159,4 +155,18 @@ export class PoliciesService {
     return policy;
   }
 
+  async cancel(idPolicy: string) {
+    const policy = await this.prisma.policy.findUnique({ where: { serialNumber: idPolicy } });
+    if (policy) {
+      const cancelPolicy = await this.prisma.policy.update({
+        where: { serialNumber: idPolicy },
+        data: { isCanceled: true }
+      });
+      return cancelPolicy.serialNumber;
+    }
+    return null;
+  }
+
 }
+
+

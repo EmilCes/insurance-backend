@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException, ParseIntPipe, ValidationPipe, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException, ParseIntPipe, ValidationPipe, ParseUUIDPipe, HttpCode, Put, BadRequestException, HttpException, UnprocessableEntityException, HttpStatus } from '@nestjs/common';
 import { PoliciesService } from './policies.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { Public } from 'src/skipAuth.decorator';
@@ -10,33 +10,80 @@ export class PoliciesController {
   @Public()
   @Post()
   async create(@Body(ValidationPipe) createPolicyDto: CreatePolicyDto) {
-    return await this.policiesService.create(createPolicyDto);
+    try {
+      const policyCreated = await this.policiesService.create(createPolicyDto);
+      return policyCreated;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw new HttpException(err.message, err.getStatus());
+      }
+      throw new UnprocessableEntityException("Error creating the policy");
+    }
+  }
+
+  @Public()
+  @Put("/cancel/:id")
+  @HttpCode(204)
+  async cancelPolicy(@Param("id", ParseUUIDPipe) idPolicy: string) {
+    try {
+      const response = await this.policiesService.cancel(idPolicy);
+      if (response == null) {
+        throw new BadRequestException("Policy doesn't exists");
+      }
+      return;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw new HttpException(err.message, err.getStatus());
+      }
+      throw new UnprocessableEntityException("Error canceling the policy");
+    }
+
   }
 
   @Public()
   @Get()
   async findAll(@Query("page", ParseIntPipe) query: number) {
-    const policies = await this.policiesService.findAll(query);
-    if (policies) {
-      return policies;
+    try {
+      const policies = await this.policiesService.findAll(query);
+      if (policies) {
+        return policies;
+      }
+      throw new NotFoundException("Policies not found");
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw new HttpException(err.message, err.getStatus());
+      }
+      throw new UnprocessableEntityException("Error getting the policies");
     }
-    throw new NotFoundException("Policies not found");
+
   }
 
   @Public()
   @Get("/total")
   async findAllTotal() {
-    return await this.policiesService.findAllTotal();
+    try {
+      return await this.policiesService.findAllTotal();
+    } catch (err) {
+      throw new UnprocessableEntityException("Error getting the total policies");
+    }
+
   }
 
   @Public()
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    const policy = await this.policiesService.findOne(id);
-    if (policy) {
-      return policy;
+    try {
+      const policy = await this.policiesService.findOne(id);
+      if (policy) {
+        return policy;
+      }
+      throw new NotFoundException("Policy not found");
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw new HttpException(err.message, err.getStatus());
+      }
+      throw new UnprocessableEntityException("Error finding one policy");
     }
-    throw new NotFoundException("Policy not found");
   }
 
 }

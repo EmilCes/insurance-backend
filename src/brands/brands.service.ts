@@ -1,7 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { BrandModel } from './entities/brandModel.entity';
-
 
 @Injectable()
 export class BrandsService {
@@ -20,28 +18,15 @@ export class BrandsService {
         }
       }
     });
-    if (!brands) {
-      throw new NotFoundException(`Brands not found`);
-    }
     return brands;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} brand`;
-  }
-
-  async findModelBrand(idModel: number){
+  async findModelBrand(idModel: number) {
     const modelBrand = await this.prisma.model.findUnique({
-      where: { idModel : idModel },
+      where: { idModel: idModel },
       select: { year: true, Brand: true }
     });
-    
-    if (!modelBrand) {
-      throw new NotFoundException(`Brand or Model not found`);
-    }
-
-    const brandModel: BrandModel = { idBrand: modelBrand.Brand.idBrand, name: modelBrand.Brand.name, year: modelBrand.year};    
-    return brandModel;
+    return modelBrand;
   }
 
 }
