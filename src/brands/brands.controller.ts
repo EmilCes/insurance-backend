@@ -7,7 +7,6 @@ import { BrandModel } from './entities/brandModel.entity';
 export class BrandsController {
   constructor(private readonly brandsService: BrandsService) { }
 
-  @Public()
   @Get()
   async findAll() {
     try {
@@ -24,7 +23,6 @@ export class BrandsController {
     }
   }
 
-  @Public()
   @Get('/models/:idModel')
   async findModels(@Param('idModel') idModel: string) {
     try {

@@ -8,7 +8,7 @@ export class UsersService {
 
   constructor(
     private prisma: PrismaService
-  ) {}
+  ) { }
 
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
@@ -18,22 +18,21 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(userId: string) {
-    /*const userFound = this.prisma.user.findUnique({ where: { id: userId } });
+  findOne(userId: number) {
+    const userFound = this.prisma.account.findUnique({ where: { idAccount: userId } });
 
     if (!userFound)
       throw new NotFoundException(`Usuario con ${userId} no encontrado`);
 
-    return userFound;*/
+    return userFound;
   }
 
-  signIn(email: string) {
-    /*const userFound = this.prisma.user.findUnique({ where: { email: email } });
-
+  async signIn(email: string) {
+    const userFound = await this.prisma.account.findFirst({ where: { email: email } });
     if (!userFound)
       throw new NotFoundException(`Usuario no encontrado`);
 
-    return userFound;*/
+    return userFound;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

@@ -6,7 +6,6 @@ import { Public } from 'src/skipAuth.decorator';
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) { }
 
-  @Public()
   @Get('/colors')
   async findColors() {
     try {
@@ -24,7 +23,6 @@ export class VehiclesController {
 
   }
 
-  @Public()
   @Get('/services')
   async findServiceVehicle() {
     try {
@@ -42,7 +40,6 @@ export class VehiclesController {
 
   }
 
-  @Public()
   @Get('/types')
   async findType() {
     try {
@@ -60,7 +57,6 @@ export class VehiclesController {
 
   }
 
-  @Public()
   @Get('/plates/:plates')
   async validatePlates(@Param('plates') id: string) {
     try {

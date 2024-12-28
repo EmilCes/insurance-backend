@@ -7,7 +7,6 @@ import { Public } from 'src/skipAuth.decorator';
 export class PoliciesController {
   constructor(private readonly policiesService: PoliciesService) { }
 
-  @Public()
   @Post()
   async create(@Body(ValidationPipe) createPolicyDto: CreatePolicyDto) {
     try {
@@ -21,7 +20,6 @@ export class PoliciesController {
     }
   }
 
-  @Public()
   @Put("/cancel/:id")
   @HttpCode(204)
   async cancelPolicy(@Param("id", ParseUUIDPipe) idPolicy: string) {
@@ -40,7 +38,6 @@ export class PoliciesController {
 
   }
 
-  @Public()
   @Get()
   async findAll(@Query("page", ParseIntPipe) query: number) {
     try {
@@ -58,7 +55,6 @@ export class PoliciesController {
 
   }
 
-  @Public()
   @Get("/total")
   async findAllTotal() {
     try {
@@ -69,7 +65,6 @@ export class PoliciesController {
 
   }
 
-  @Public()
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {

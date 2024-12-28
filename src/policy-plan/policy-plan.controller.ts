@@ -22,7 +22,6 @@ export class PolicyPlanController {
     }
   }
 
-  @Public()
   @Get("/current")
   async findAll() {
     try {
@@ -38,7 +37,6 @@ export class PolicyPlanController {
     }
   }
 
-  @Public()
   @Get(':id')
   async findOnePlanPolicy(@Param('id') id: string) {
     try {
@@ -55,13 +53,11 @@ export class PolicyPlanController {
     }
   }
 
-  @Public()
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePolicyPlanDto: UpdatePolicyPlanDto) {
     return this.policyPlanService.update(+id, updatePolicyPlanDto);
   }
 
-  @Public()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.policyPlanService.remove(+id);
