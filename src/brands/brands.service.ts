@@ -31,7 +31,11 @@ export class BrandsService {
   }
 
   async findModelBrand(idModel: number){
-    const model = await this.prisma.model.findUnique({ where: { idModel : idModel }});
+    const modelBrand = await this.prisma.model.findUnique({
+      where: { idModel : idModel },
+      select: { year: true, Brand: true }
+    });
+    /*const model = await this.prisma.model.findUnique({ where: { idModel : idModel }});
     if (!model) {
       throw new NotFoundException(`Model not found`);
     }
@@ -43,12 +47,12 @@ export class BrandsService {
           where: {idModel : idModel}
         }
       }
-    });
-    if (!brand) {
-      throw new NotFoundException(`Brand not found`);
+    });*/
+    if (!modelBrand) {
+      throw new NotFoundException(`Brand or Model not found`);
     }
 
-    const brandModel: BrandModel = { idBrand: brand.idBrand, name: brand.name, year: model.year};    
+    const brandModel: BrandModel = { idBrand: modelBrand.Brand.idBrand, name: modelBrand.Brand.name, year: modelBrand.year};    
     return brandModel;
   }
 
