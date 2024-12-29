@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, ConflictException, HttpException, UnprocessableEntityException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, ConflictException, HttpException, UnprocessableEntityException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
-import { Public } from 'src/skipAuth.decorator';
 
 @Controller('vehicles')
 export class VehiclesController {
@@ -16,7 +15,7 @@ export class VehiclesController {
       return colors;
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error getting the colors");
     }
@@ -33,7 +32,7 @@ export class VehiclesController {
       return serviceVehicle;
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error getting the vehicle services");
     }
@@ -50,7 +49,7 @@ export class VehiclesController {
       return types;
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error getting the vehicle types");
     }
@@ -67,7 +66,7 @@ export class VehiclesController {
       return;
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error validating the plates");
     }

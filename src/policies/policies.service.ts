@@ -114,11 +114,32 @@ export class PoliciesService {
     return policies;
   }
 
+  async findAllFilter(page: number, type: string, status: number) {
+    const numberPoliciesPerPage = 4;
+    const PolicyPlan = (type == "0") ? {} : { idPolicyPlan: type };
+
+    const policies = await this.prisma.policy.findMany({
+      where: {
+        idUser: 1, PolicyPlan
+      },
+      select: {
+        serialNumber: true, planTitle: true, startDate: true, yearsPolicy: true, isCanceled: true, idPolicyPlan: true,
+        Vehicle: { select: { Model: { select: { year: true, Brand: { select: { name: true } } } } } }
+      },
+      take: numberPoliciesPerPage,
+      skip: ((page - 1) * numberPoliciesPerPage)
+    });
+
+    if (policies.length <= 0) {
+      return null;
+    }
+    return policies;
+  }
+
   async findAllTotal() {
     const policies = await this.prisma.policy.count({ where: { idUser: 1 } });
     return policies;
   }
-
 
   async findOne(id: string) {
     const policy = await this.prisma.policy.findUnique({

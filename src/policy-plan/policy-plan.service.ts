@@ -40,7 +40,22 @@ export class PolicyPlanService {
         PolicyPlanStatus: true
       }
     });
-   
+
+    return policies;
+  }
+
+  async findAllCurrentTitles() {
+    const policies = await this.prisma.policyPlan.findMany({
+      where: {
+        PolicyPlanStatus: {
+          policyPlanStatusType: 'Vigente'
+        }
+      },
+      select: {
+        title: true, idPolicyPlan: true
+      }
+    });
+
     return policies;
   }
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, UnprocessableEntityException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, UnprocessableEntityException, BadRequestException } from '@nestjs/common';
 import { BrandsService } from './brands.service';
 import { Public } from 'src/skipAuth.decorator';
 import { BrandModel } from './entities/brandModel.entity';
@@ -17,7 +17,7 @@ export class BrandsController {
       return brands;
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error getting the brands");
     }
@@ -35,7 +35,7 @@ export class BrandsController {
       
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error getting the models and brands");
     }

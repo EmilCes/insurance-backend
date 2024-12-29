@@ -16,7 +16,7 @@ export class PoliciesController {
       return policyCreated;
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error creating the policy");
     }
@@ -34,11 +34,10 @@ export class PoliciesController {
       return;
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error canceling the policy");
     }
-
   }
 
   @Get()
@@ -51,11 +50,26 @@ export class PoliciesController {
       throw new NotFoundException("Policies not found");
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error getting the policies");
     }
+  }
 
+  @Get("/filter")
+  async findFilter(@Query("page", ParseIntPipe) query: number) {
+    try {
+      const policies = await this.policiesService.findAllFilter(query, "a09be575-f839-4ba1-bfd9-e64c3f59e1b8", 1);
+      if (policies) {
+        return policies;
+      }
+      throw new NotFoundException("Policies not found");
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new UnprocessableEntityException("Error getting the policies");
+    }
   }
 
   @RoleDriver()
@@ -66,7 +80,6 @@ export class PoliciesController {
     } catch (err) {
       throw new UnprocessableEntityException("Error getting the total policies");
     }
-
   }
 
   @Get(':id')
@@ -79,7 +92,7 @@ export class PoliciesController {
       throw new NotFoundException("Policy not found");
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error finding one policy");
     }

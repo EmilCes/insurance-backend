@@ -25,15 +25,31 @@ export class PolicyPlanController {
 
   @RoleDriver()
   @Get("/current")
-  async findAll() {
+  async findCurrentPlanPolicies() {
     try {
-      const policies = await this.policyPlanService.findAllCurrent();
-      if (!policies)
+      const policyPlans = await this.policyPlanService.findAllCurrent();
+      if (!policyPlans)
         throw new NotFoundException(`Policies plans not found`);
-      return policies;
+      return policyPlans;
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
+      }
+      throw new UnprocessableEntityException("Error getting the current plans");
+    }
+  }
+  
+  @RoleDriver()
+  @Get("/current/types")
+  async findAll() {
+    try {
+      const policyPlansTitle = await this.policyPlanService.findAllCurrentTitles();
+      if (!policyPlansTitle)
+        throw new NotFoundException(`Policies plans not found`);
+      return policyPlansTitle;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
       }
       throw new UnprocessableEntityException("Error getting the current plans");
     }
@@ -49,7 +65,7 @@ export class PolicyPlanController {
       return policyPlans;
     } catch (err) {
       if (err instanceof HttpException) {
-        throw new HttpException(err.message, err.getStatus());
+        throw err;
       }
       throw new UnprocessableEntityException("Error getting the policy plan");
     }
