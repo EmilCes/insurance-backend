@@ -1,20 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException, ParseIntPipe, ValidationPipe, ParseUUIDPipe, HttpCode, Put, BadRequestException, HttpException, UnprocessableEntityException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException, ParseIntPipe, ValidationPipe, ParseUUIDPipe, HttpCode, Put, BadRequestException, HttpException, UnprocessableEntityException, HttpStatus, Request } from '@nestjs/common';
 import { PoliciesService } from './policies.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { Public } from 'src/skipAuth.decorator';
 import { RoleAdjuster, RoleDriver } from 'src/roleAuth.decorator';
 import { isUUID } from 'class-validator';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('policies')
 export class PoliciesController {
-  constructor(private readonly policiesService: PoliciesService) { }
+  constructor(private readonly policiesService: PoliciesService, private readonly usersService: UsersService) { }
 
   @RoleDriver()
   @Post()
-  async create(@Body(ValidationPipe) createPolicyDto: CreatePolicyDto) {
+  async create(@Request() req, @Body(ValidationPipe) createPolicyDto: CreatePolicyDto) {
     try {
-      const policyCreated = await this.policiesService.create(createPolicyDto);
-      return policyCreated;
+      const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
+      if (idUser > 0) {
+        const policyCreated = await this.policiesService.create(createPolicyDto, idUser);
+        return policyCreated;
+      }
+      throw new BadRequestException("Error with the request data");
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -26,9 +31,14 @@ export class PoliciesController {
   @RoleDriver()
   @Put("/cancel/:id")
   @HttpCode(204)
-  async cancelPolicy(@Param("id", ParseUUIDPipe) idPolicy: string) {
+  async cancelPolicy(@Request() req, @Param("id", ParseUUIDPipe) idPolicy: string) {
     try {
-      const response = await this.policiesService.cancel(idPolicy);
+      const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
+      if(idUser <= 0){
+        throw new BadRequestException("Error with the request data");
+      }
+
+      const response = await this.policiesService.cancel(idPolicy, idUser);
       if (response == null) {
         throw new BadRequestException("Policy doesn't exists");
       }
@@ -42,8 +52,14 @@ export class PoliciesController {
   }
 
   @Get()
-  async findFilter(@Query("page", ParseIntPipe) query: number, @Query("type") type: string, @Query("status", ParseIntPipe) status: number, @Query("idPolicy") idPolicy: string) {
+  async findFilter(@Request() req, @Query("page", ParseIntPipe) query: number, @Query("type") type: string,
+    @Query("status", ParseIntPipe) status: number, @Query("idPolicy") idPolicy: string) {
     try {
+      const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
+      if(idUser <= 0){
+        throw new BadRequestException("Error with the request data");
+      }
+
       const typePlan = isUUID(type) || type == "0" ? type : undefined;
       if (typePlan == undefined) {
         throw new BadRequestException("Invalid type");
@@ -52,14 +68,14 @@ export class PoliciesController {
       switch (status) {
         case 1:
         case 2:
-          const statusPolicies = await this.policiesService.findActiveInvalidPolicies(query, typePlan, status, idPolicy);
+          const statusPolicies = await this.policiesService.findActiveInvalidPolicies(query, typePlan, status, idPolicy, idUser);
           if (statusPolicies.length > 0) {
             return statusPolicies;
           }
           break;
         case 0:
         case 3:
-          const policies = await this.policiesService.findAllFilter(query, typePlan, status, idPolicy);
+          const policies = await this.policiesService.findAllFilter(query, typePlan, status, idPolicy, idUser);
           if (policies.length > 0) {
             return policies;
           }
@@ -78,8 +94,13 @@ export class PoliciesController {
 
   @RoleDriver()
   @Get("/total")
-  async findAllTotal(@Query("type") type: string, @Query("status", ParseIntPipe) status: number, @Query("idPolicy") idPolicy: string) {
+  async findAllTotal(@Request() req, @Query("type") type: string, @Query("status", ParseIntPipe) status: number, @Query("idPolicy") idPolicy: string) {
     try {
+      const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
+      if(idUser <= 0){
+        throw new BadRequestException("Error with the request data");
+      }
+
       const typePlan = isUUID(type) || type == "0" ? type : undefined;
       if (typePlan == undefined) {
         throw new BadRequestException("Invalid type");
@@ -88,10 +109,10 @@ export class PoliciesController {
       switch (status) {
         case 1:
         case 2:
-          return await this.policiesService.findAllTotalStatus(type, status, idPolicy);
+          return await this.policiesService.findAllTotalStatus(type, status, idPolicy, idUser);
         case 0:
         case 3:
-          return await this.policiesService.findAllTotal(type, status, idPolicy);
+          return await this.policiesService.findAllTotal(type, status, idPolicy, idUser);
         default:
           throw new BadRequestException("Invalid status");
       }
@@ -105,9 +126,14 @@ export class PoliciesController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+  async findOne(@Request() req, @Param('id', ParseUUIDPipe) id: string) {
     try {
-      const policy = await this.policiesService.findOne(id);
+      const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
+      if(idUser <= 0){
+        throw new BadRequestException("Error with the request data");
+      }
+
+      const policy = await this.policiesService.findOne(id, idUser);
       if (policy) {
         return policy;
       }

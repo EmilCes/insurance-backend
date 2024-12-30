@@ -35,6 +35,14 @@ export class UsersService {
     return userFound;
   }
 
+  async getIdUserFromEmail(email : string) {
+    if(email == undefined){
+      return 0;
+    }
+    const user = await this.prisma.account.findFirst({ where: {email : { equals : email}}, select: { idUser: true}});
+    return user?.idUser == undefined ? 0 : user.idUser;
+  }
+
   async getTypeEmployee(idEmployee: number) {
     const employeeType = await this.prisma.employee.findUnique({
       select: { EmployeeType: { select: { employeeType: true }}},
