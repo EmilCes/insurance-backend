@@ -42,7 +42,7 @@ export class PoliciesController {
   }
 
   @Get()
-  async findFilter(@Query("page", ParseIntPipe) query: number, @Query("type") type: string, @Query("status", ParseIntPipe) status: number) {
+  async findFilter(@Query("page", ParseIntPipe) query: number, @Query("type") type: string, @Query("status", ParseIntPipe) status: number, @Query("idPolicy") idPolicy: string) {
     try {
       const typePlan = isUUID(type) || type == "0" ? type : undefined;
       if (typePlan == undefined) {
@@ -52,14 +52,14 @@ export class PoliciesController {
       switch (status) {
         case 1:
         case 2:
-          const statusPolicies = await this.policiesService.findActiveInvalidPolicies(query, typePlan, status);
+          const statusPolicies = await this.policiesService.findActiveInvalidPolicies(query, typePlan, status, idPolicy);
           if (statusPolicies.length > 0) {
             return statusPolicies;
           }
           break;
         case 0:
         case 3:
-          const policies = await this.policiesService.findAllFilter(query, typePlan, status);
+          const policies = await this.policiesService.findAllFilter(query, typePlan, status, idPolicy);
           if (policies.length > 0) {
             return policies;
           }
@@ -78,7 +78,7 @@ export class PoliciesController {
 
   @RoleDriver()
   @Get("/total")
-  async findAllTotal(@Query("type") type: string, @Query("status", ParseIntPipe) status: number) {
+  async findAllTotal(@Query("type") type: string, @Query("status", ParseIntPipe) status: number, @Query("idPolicy") idPolicy: string) {
     try {
       const typePlan = isUUID(type) || type == "0" ? type : undefined;
       if (typePlan == undefined) {
@@ -88,10 +88,10 @@ export class PoliciesController {
       switch (status) {
         case 1:
         case 2:
-          return await this.policiesService.findAllTotalStatus(type, status);
+          return await this.policiesService.findAllTotalStatus(type, status, idPolicy);
         case 0:
         case 3:
-          return await this.policiesService.findAllTotal(type, status);
+          return await this.policiesService.findAllTotal(type, status, idPolicy);
         default:
           throw new BadRequestException("Invalid status");
       }
