@@ -3,6 +3,7 @@ import { PoliciesService } from './policies.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { Public } from 'src/skipAuth.decorator';
 import { RoleAdjuster, RoleDriver } from 'src/roleAuth.decorator';
+import { isUUID } from 'class-validator';
 
 @Controller('policies')
 export class PoliciesController {
@@ -41,27 +42,30 @@ export class PoliciesController {
   }
 
   @Get()
-  async findAll(@Query("page", ParseIntPipe) query: number) {
+  async findFilter(@Query("page", ParseIntPipe) query: number, @Query("type") type: string, @Query("status", ParseIntPipe) status: number) {
     try {
-      const policies = await this.policiesService.findAll(query);
-      if (policies) {
-        return policies;
+      const typePlan = isUUID(type) || type == "0" ? type : undefined;
+      if (typePlan == undefined) {
+        throw new BadRequestException("Invalid type");
       }
-      throw new NotFoundException("Policies not found");
-    } catch (err) {
-      if (err instanceof HttpException) {
-        throw err;
-      }
-      throw new UnprocessableEntityException("Error getting the policies");
-    }
-  }
 
-  @Get("/filter")
-  async findFilter(@Query("page", ParseIntPipe) query: number) {
-    try {
-      const policies = await this.policiesService.findAllFilter(query, "a09be575-f839-4ba1-bfd9-e64c3f59e1b8", 1);
-      if (policies) {
-        return policies;
+      switch (status) {
+        case 1:
+        case 2:
+          const statusPolicies = await this.policiesService.findActiveInvalidPolicies(query, typePlan, status);
+          if (statusPolicies.length > 0) {
+            return statusPolicies;
+          }
+          break;
+        case 0:
+        case 3:
+          const policies = await this.policiesService.findAllFilter(query, typePlan, status);
+          if (policies.length > 0) {
+            return policies;
+          }
+          break;
+        default:
+          throw new BadRequestException("Invalid status");
       }
       throw new NotFoundException("Policies not found");
     } catch (err) {
@@ -74,10 +78,28 @@ export class PoliciesController {
 
   @RoleDriver()
   @Get("/total")
-  async findAllTotal() {
+  async findAllTotal(@Query("type") type: string, @Query("status", ParseIntPipe) status: number) {
     try {
-      return await this.policiesService.findAllTotal();
+      const typePlan = isUUID(type) || type == "0" ? type : undefined;
+      if (typePlan == undefined) {
+        throw new BadRequestException("Invalid type");
+      }
+
+      switch (status) {
+        case 1:
+        case 2:
+          return await this.policiesService.findAllTotalStatus(type, status);
+        case 0:
+        case 3:
+          return await this.policiesService.findAllTotal(type, status);
+        default:
+          throw new BadRequestException("Invalid status");
+      }
+
     } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
       throw new UnprocessableEntityException("Error getting the total policies");
     }
   }

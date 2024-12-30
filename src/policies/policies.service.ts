@@ -4,13 +4,14 @@ import { PrismaService } from 'src/prisma.service';
 import { Prisma } from '@prisma/client';
 import { VehiclesService } from 'src/vehicles/vehicles.service';
 
+const numberPoliciesPerPage = 4;
+
 @Injectable()
 export class PoliciesService {
   constructor(
     private prisma: PrismaService,
     private vehicleService: VehiclesService
   ) { }
-
 
   async create(createPolicyDto: CreatePolicyDto) {
     //Recuperar usuario
@@ -88,7 +89,6 @@ export class PoliciesService {
   }
 
   async findAll(page: number) {
-    const numberPoliciesPerPage = 4;
     const policies = await this.prisma.policy.findMany({
       where: { idUser: 1 },
       select: {
@@ -115,12 +115,12 @@ export class PoliciesService {
   }
 
   async findAllFilter(page: number, type: string, status: number) {
-    const numberPoliciesPerPage = 4;
     const PolicyPlan = (type == "0") ? {} : { idPolicyPlan: type };
+    const statusCanceled = (status == 3) ? true : {};
 
     const policies = await this.prisma.policy.findMany({
       where: {
-        idUser: 1, PolicyPlan
+        idUser: 1, isCanceled: statusCanceled, PolicyPlan
       },
       select: {
         serialNumber: true, planTitle: true, startDate: true, yearsPolicy: true, isCanceled: true, idPolicyPlan: true,
@@ -130,15 +130,76 @@ export class PoliciesService {
       skip: ((page - 1) * numberPoliciesPerPage)
     });
 
-    if (policies.length <= 0) {
-      return null;
-    }
     return policies;
   }
 
-  async findAllTotal() {
-    const policies = await this.prisma.policy.count({ where: { idUser: 1 } });
+  async findActiveInvalidPolicies(page: number, type: string, status: number) {
+    const currentDate = new Date();
+    const PolicyPlan = (type == "0") ? {} : { idPolicyPlan: type };
+
+    const policies = await this.prisma.policy.findMany({
+      where: {
+        idUser: 1, PolicyPlan
+      },
+      select: {
+        serialNumber: true, planTitle: true, startDate: true, yearsPolicy: true, isCanceled: true, idPolicyPlan: true,
+        Vehicle: { select: { Model: { select: { year: true, Brand: { select: { name: true } } } } } }
+      }
+    });
+
+    if (status == 1) {
+      const activePolicies = policies.filter((policy) => {
+        const start = new Date(policy.startDate)
+        const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
+        return endDate >= currentDate;
+      });
+      return activePolicies.slice((page - 1) * numberPoliciesPerPage, numberPoliciesPerPage);
+    }
+    
+    const notValidPolicies = policies.filter((policy) => {
+      const start = new Date (policy.startDate)
+      const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
+      return endDate < currentDate;
+    });
+    return notValidPolicies.slice((page - 1) * numberPoliciesPerPage, numberPoliciesPerPage);
+  }
+
+  async findAllTotal(type: string, status: number) {
+    const PolicyPlan = (type == "0") ? {} : { idPolicyPlan: type };
+    const statusCanceled = (status == 3) ? true : {};
+
+    const policies = await this.prisma.policy.count({ where: { idUser: 1, PolicyPlan, isCanceled: statusCanceled } });
     return policies;
+  }
+
+  async findAllTotalStatus(type: string, status: number) {
+    const PolicyPlan = (type == "0") ? {} : { idPolicyPlan: type };
+    const currentDate = new Date();
+
+    const policies = await this.prisma.policy.findMany({
+      where: { 
+        idUser: 1, PolicyPlan
+      },
+      select: {
+        startDate: true, yearsPolicy: true
+      }
+    });
+
+    if (status == 1) {
+      const activePolicies = policies.filter((policy) => {
+        const start = new Date(policy.startDate)
+        const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
+        return endDate >= currentDate;
+      });
+      return activePolicies.length;
+    }
+    
+    const notValidPolicies = policies.filter((policy) => {
+      const start = new Date (policy.startDate)
+      const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
+      return endDate < currentDate;
+    });
+    return notValidPolicies.length;
   }
 
   async findOne(id: string) {
