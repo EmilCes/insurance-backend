@@ -77,7 +77,7 @@ export class PoliciesController {
         throw new BadRequestException("Error with the request data");
       }
 
-      const typePlan = isUUID(type) || type == "0" ? type : undefined;
+      const typePlan = type.length > 0 || type == "0" ? type : undefined;
       if (typePlan == undefined) {
         throw new BadRequestException("Invalid type");
       }
@@ -118,7 +118,7 @@ export class PoliciesController {
         throw new BadRequestException("Error with the request data");
       }
 
-      const typePlan = isUUID(type) || type == "0" ? type : undefined;
+      const typePlan = type.length > 0 || type == "0" ? type : undefined;
       if (typePlan == undefined) {
         throw new BadRequestException("Invalid type");
       }
@@ -139,6 +139,27 @@ export class PoliciesController {
         throw err;
       }
       throw new UnprocessableEntityException("Error getting the total policies");
+    }
+  }
+
+  @RoleDriver()
+  @Get("/current/types")
+  async findAll(@Request() req) {
+    try {
+      const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
+      if (idUser <= 0) {
+        throw new BadRequestException("Error with the request data");
+      }
+
+      const policyPlansTitle = await this.policiesService.findAllCurrentTitles(idUser);
+      if (!policyPlansTitle || policyPlansTitle.length <= 0)
+        throw new NotFoundException(`Policies plans not found`);
+      return policyPlansTitle;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new UnprocessableEntityException("Error getting the current plans");
     }
   }
 

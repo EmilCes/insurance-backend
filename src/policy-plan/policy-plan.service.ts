@@ -44,22 +44,6 @@ export class PolicyPlanService {
     return policies;
   }
 
-  async findAllCurrentTitles() {
-    const policies = await this.prisma.policyPlan.findMany({
-      where: {
-        PolicyPlanStatus: {
-          policyPlanStatusType: 'Vigente'
-        }
-      },
-      select: {
-        title: true, idPolicyPlan: true
-      }
-    });
-
-    return policies;
-  }
-
-
   async findPlanPolicy(id: string) {
     const policyPlans = await this.prisma.policyPlan.findUnique({
       where: {

@@ -109,13 +109,13 @@ export class PoliciesService {
   }
 
   async findAllFilter(page: number, type: string, status: number, idPolicy: string, idUser: number) {
-    const PolicyPlan = (type == "0") ? {} : { idPolicyPlan: { equals: type } };
+    const planTitle = (type == "0") ? {} : { equals: type };
     const statusCanceled = (status == 3) ? true : {};
     const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy }
 
     const policies = await this.prisma.policy.findMany({
       where: {
-        idUser: idUser, isCanceled: statusCanceled, PolicyPlan, serialNumber
+        idUser: idUser, isCanceled: statusCanceled, planTitle, serialNumber
       },
       select: {
         serialNumber: true, planTitle: true, startDate: true, yearsPolicy: true, isCanceled: true, idPolicyPlan: true,
@@ -130,12 +130,12 @@ export class PoliciesService {
 
   async findActiveInvalidPolicies(page: number, type: string, status: number, idPolicy: string, idUser: number) {
     const currentDate = new Date();
-    const PolicyPlan = (type == "0") ? {} : { idPolicyPlan: { equals: type } };
+    const planTitle = (type == "0") ? {} : { equals: type };
     const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy }
 
     const policies = await this.prisma.policy.findMany({
       where: {
-        idUser: idUser, PolicyPlan, serialNumber, isCanceled: false
+        idUser: idUser, planTitle, serialNumber, isCanceled: false
       },
       select: {
         serialNumber: true, planTitle: true, startDate: true, yearsPolicy: true, isCanceled: true, idPolicyPlan: true,
@@ -161,22 +161,22 @@ export class PoliciesService {
   }
 
   async findAllTotal(type: string, status: number, idPolicy: string, idUser: number) {
-    const PolicyPlan = (type == "0") ? {} : { idPolicyPlan: { equals: type } };
+    const planTitle = (type == "0") ? {} : { equals: type };
     const statusCanceled = (status == 3) ? true : {};
     const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy }
 
-    const policies = await this.prisma.policy.count({ where: { idUser: idUser, PolicyPlan, isCanceled: statusCanceled, serialNumber } });
+    const policies = await this.prisma.policy.count({ where: { idUser: idUser, planTitle, isCanceled: statusCanceled, serialNumber } });
     return policies;
   }
 
   async findAllTotalStatus(type: string, status: number, idPolicy: string, idUser: number) {
-    const PolicyPlan = (type == "0") ? {} : { idPolicyPlan: { equals: type } };
+    const planTitle = (type == "0") ? {} : { equals: type };
     const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy }
     const currentDate = new Date();
 
     const policies = await this.prisma.policy.findMany({
       where: {
-        idUser: idUser, PolicyPlan, serialNumber, isCanceled: false
+        idUser: idUser, planTitle, serialNumber, isCanceled: false
       },
       select: {
         startDate: true, yearsPolicy: true
@@ -246,6 +246,20 @@ export class PoliciesService {
     }
     return null;
   }
+
+  async findAllCurrentTitles(idUser: number) {
+    const policies = await this.prisma.policy.groupBy({
+      by: ['planTitle'],
+      where: {
+        Driver: {
+          idUser: idUser
+        }
+      }
+    });
+
+    return policies;
+  }
+
 
   async vehicleWithValidPolicies(plates: string, idUser: number) {
     const policiesWithPlate = await this.prisma.policy.findMany({

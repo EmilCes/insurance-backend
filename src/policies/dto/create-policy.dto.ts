@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString, IsUUID, Length } from "class-validator";
+import { IsNotEmpty, IsNumber, IsPositive, IsString, IsUUID, Length, Matches } from "class-validator";
 
 export class CreatePolicyDto {
     @IsNumber()
@@ -17,6 +17,7 @@ export class CreatePolicyDto {
     @IsNotEmpty()
     @IsString()
     @Length(7, 15)
+    @Matches("^(?=(?:.*[A-Z0-9]){7})(?=(?:.*-){2})[A-Z0-9-]{9}$")
     plates: string;
 
     @IsNumber()
