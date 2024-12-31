@@ -75,6 +75,7 @@ model Vehicle {
   idModel             Int
   idColor             Int
   Policy              Policy[]
+  Report              Report[]
   Color               Color          @relation(fields: [idColor], references: [idColor])
   Model               Model          @relation(fields: [idModel], references: [idModel])
   ServiceVehicle      ServiceVehicle @relation(fields: [idService], references: [idService])
@@ -161,6 +162,8 @@ model Report {
   result             String           @db.Text
   reportDecisionDate DateTime
   idStatus           Int
+  plates             String           @db.VarChar(15)
+  Vehicle            Vehicle          @relation(fields: [plates], references: [plates])
   ImplicateParties   ImplicateParty[]
   Photographs        Photograph[]
   Status             Status           @relation(fields: [idStatus], references: [idStatus])

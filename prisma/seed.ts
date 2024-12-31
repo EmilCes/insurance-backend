@@ -1,11 +1,17 @@
 import { PrismaClient } from "@prisma/client";
-import { state, municipality, drivers, account, colors, type, serviceVehicle, policyPlanStatus, policyPlans, policyPlansServices, brands, models, employeeType } from "./modelsSeed";
+import { state, municipality, drivers, account, colors, type, serviceVehicle, policyPlanStatus, policyPlans, policyPlansServices, brands, models, employeeType, employee, vehicle, policies, policyServices } from "./modelsSeed";
 
 const prisma = new PrismaClient();
 
 async function main() {
     for (let item of employeeType) {
         await prisma.employeeType.create({
+            data: item,
+        });
+    }
+
+    for (let item of employee) {
+        await prisma.employee.create({
             data: item,
         });
     }
@@ -78,6 +84,24 @@ async function main() {
 
     for (let item of policyPlansServices) {
         await prisma.service.create({
+            data: item,
+        });
+    }
+
+    for (let item of vehicle) {
+        await prisma.vehicle.create({
+            data: item,
+        });
+    }
+
+    for (let item of policies) {
+        await prisma.policy.create({
+            data: item,
+        });
+    }
+
+    for (let item of policyServices) {
+        await prisma.policyService.create({
             data: item,
         });
     }

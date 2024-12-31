@@ -168,6 +168,7 @@ CREATE TABLE "Report" (
     "result" TEXT NOT NULL,
     "reportDecisionDate" TIMESTAMP(3) NOT NULL,
     "idStatus" INTEGER NOT NULL,
+    "plates" VARCHAR(15) NOT NULL,
 
     CONSTRAINT "Report_pkey" PRIMARY KEY ("idReport")
 );
@@ -285,6 +286,9 @@ ALTER TABLE "Account" ADD CONSTRAINT "Account_idUser_fkey" FOREIGN KEY ("idUser"
 
 -- AddForeignKey
 ALTER TABLE "Municipality" ADD CONSTRAINT "Municipality_idState_fkey" FOREIGN KEY ("idState") REFERENCES "State"("idState") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Report" ADD CONSTRAINT "Report_plates_fkey" FOREIGN KEY ("plates") REFERENCES "Vehicle"("plates") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Report" ADD CONSTRAINT "Report_idStatus_fkey" FOREIGN KEY ("idStatus") REFERENCES "Status"("idStatus") ON DELETE RESTRICT ON UPDATE CASCADE;

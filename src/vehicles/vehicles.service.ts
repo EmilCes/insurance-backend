@@ -23,7 +23,6 @@ export class VehiclesService {
   }
 
   async validatePlates(plate: string) {
-    //In the same plan
     const vehicle = await this.prisma.vehicle.findUnique({
       where: { plates: plate }
     });

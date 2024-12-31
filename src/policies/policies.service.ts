@@ -3,6 +3,7 @@ import { CreatePolicyDto } from './dto/create-policy.dto';
 import { PrismaService } from 'src/prisma.service';
 import { Prisma } from '@prisma/client';
 import { VehiclesService } from 'src/vehicles/vehicles.service';
+import { equals } from 'class-validator';
 
 const numberPoliciesPerPage = 4;
 
@@ -14,11 +15,6 @@ export class PoliciesService {
   ) { }
 
   async create(createPolicyDto: CreatePolicyDto, idUser: number) {
-    const plates = await this.vehicleService.validatePlates(createPolicyDto.plates);
-    if (plates) {
-      throw new ConflictException("Plates found");
-    }
-
     const serviceVehicle = await this.prisma.serviceVehicle.findUnique({ where: { idService: createPolicyDto.idService } })
     const typeVehicle = await this.prisma.type.findUnique({ where: { idType: createPolicyDto.idType } })
     const modelVehicle = await this.prisma.model.findUnique({ where: { idModel: createPolicyDto.idModel, idBrand: createPolicyDto.idBrand } })
@@ -249,6 +245,27 @@ export class PoliciesService {
       return cancelPolicy.serialNumber;
     }
     return null;
+  }
+
+  async vehicleWithValidPolicies(plates: string, idUser: number) {
+    const policiesWithPlate = await this.prisma.policy.findMany({
+      where: { plates: { equals: plates }, idUser: idUser },
+      select: { startDate: true, yearsPolicy: true, isCanceled: true }
+    });
+
+    if (policiesWithPlate != null && policiesWithPlate.length > 0) {
+      const currentDate = new Date();
+
+      const activePolicies = policiesWithPlate.filter((policy) => {
+        const start = new Date(policy.startDate)
+        const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
+        const oneMonthAfterToday = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+
+        return endDate >= oneMonthAfterToday && !policy.isCanceled;
+      });
+      return activePolicies.length;
+    }
+    return 0;
   }
 
 }

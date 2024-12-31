@@ -27,6 +27,14 @@ export class UsersService {
     return userFound;
   }
 
+  async findAccountInfo(email: string) {
+    const driverFound = await this.prisma.driver.findFirst({
+      where: { Account: { email: { equals: email }} },
+      select: { bankAccountNumber: true, expirationDateBankAccount: true }
+    })
+    return driverFound;
+  }
+
   async signIn(email: string) {
     const userFound = await this.prisma.account.findFirst({ where: { email: email } });
     if (!userFound)
@@ -35,17 +43,17 @@ export class UsersService {
     return userFound;
   }
 
-  async getIdUserFromEmail(email : string) {
-    if(email == undefined){
+  async getIdUserFromEmail(email: string) {
+    if (email == undefined) {
       return 0;
     }
-    const user = await this.prisma.account.findFirst({ where: {email : { equals : email}}, select: { idUser: true}});
+    const user = await this.prisma.account.findFirst({ where: { email: { equals: email } }, select: { idUser: true } });
     return user?.idUser == undefined ? 0 : user.idUser;
   }
 
   async getTypeEmployee(idEmployee: number) {
     const employeeType = await this.prisma.employee.findUnique({
-      select: { EmployeeType: { select: { employeeType: true }}},
+      select: { EmployeeType: { select: { employeeType: true } } },
       where: { idEmployee: idEmployee }
     });
     if (!employeeType)

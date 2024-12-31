@@ -28,7 +28,7 @@ export class PolicyPlanController {
   async findCurrentPlanPolicies() {
     try {
       const policyPlans = await this.policyPlanService.findAllCurrent();
-      if (!policyPlans)
+      if (!policyPlans || policyPlans.length <= 0)
         throw new NotFoundException(`Policies plans not found`);
       return policyPlans;
     } catch (err) {
@@ -44,7 +44,7 @@ export class PolicyPlanController {
   async findAll() {
     try {
       const policyPlansTitle = await this.policyPlanService.findAllCurrentTitles();
-      if (!policyPlansTitle)
+      if (!policyPlansTitle || policyPlansTitle.length <= 0)
         throw new NotFoundException(`Policies plans not found`);
       return policyPlansTitle;
     } catch (err) {
