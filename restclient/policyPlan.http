@@ -4,11 +4,20 @@
 
 ###
 
+GET http://localhost:3002/policy-plan/current
+Authorization: Bearer {{token}}
+
+###
+
 GET http://localhost:3002/policy-plan
 Authorization: Bearer {{token}}
 
 ###
-GET http://localhost:3002/policy-plan/1
+GET http://localhost:3002/policy-plan/834adc30-6069-4a7c-b304-88ac5f67856c
+Authorization: Bearer {{token}}
+
+###
+GET http://localhost:3002/policy-plan/6cf45654-02db-4f35-b9ea-b8646eee878b
 Authorization: Bearer {{token}}
 
 ### Created
@@ -36,6 +45,44 @@ Content-Type: application/json
 }
 
 
+### 
+POST http://localhost:3002/policy-plan
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Ejemplo",
+    "description": "Ejemplo",
+    "maxPeriod": 12,
+    "basePrice":  10.50,
+    "service": [
+        {
+            "name": "Service1",
+            "isCovered": false,
+            "coveredCost": 50.00
+        }
+    ]
+}
+
+
+### 
+POST http://localhost:3002/policy-plan
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title":"TituloNuevo",
+    "description": "EjemploNuevo",
+    "maxPeriod": 21323,
+    "basePrice":  102.50,
+    "service": [
+        {
+            "name": "hola",
+            "isCovered": true,
+            "coveredCost": 50.00
+        }
+    ]
+}
 ### Error
 POST http://localhost:3002/policy-plan
 Authorization: Bearer {{token}}
@@ -64,21 +111,32 @@ Content-Type: application/json
     
 ###
 
-PATCH http://localhost:3002/policy-plan/1
+PATCH http://localhost:3002/policy-plan/9f4ca11f-d584-4c67-a20d-bb7b272071cb
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "title": "titulo",
-    "description": "description",
-    "maxPeriod": 1,
+    "title": "MODIFICADOOOOOOOOOOOOOOOOOO",
+    "description": "MODIFICADOOOOOOOOOOOOOOOOOO",
+    "maxPeriod": 12,
     "basePrice":  10.50,
-    "idPolicyPlanStatus": 1
+    "service": [
+        {
+            "name": "MODIFICADO3",
+            "isCovered": false,
+            "coveredCost": 50.00
+        },
+        {
+            "name": "MODIFICADO3",
+            "isCovered": true,
+            "coveredCost": 0.00
+        }
+    ]
 }
 
 ### NO TIENE PUT
 
-##
+##Falta editar, falta recuperar todas, falta insertar reporte
 
-DELETE http://localhost:3002/policy-plan/1
+DELETE http://localhost:3002/policy-plan/834adc30-6069-4a7c-b304-88ac5f67856c
 Authorization: Bearer {{token}}
