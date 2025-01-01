@@ -40,27 +40,12 @@ export class PolicyPlanService {
         PolicyPlanStatus: true
       }
     });
-    if (!policies)
-      throw new NotFoundException(`Policies not found`);
 
     return policies;
   }
-
-  async findAll() {
-    const policies = await this.prisma.policyPlan.findMany({
-      include: {
-        PolicyPlanStatus: true
-      }
-    });
-    if (!policies)
-      throw new NotFoundException(`Policies not found`);
-
-    return policies;
-  }
-
 
   async findPlanPolicy(id: string) {
-    const services = await this.prisma.policyPlan.findUnique({
+    const policyPlans = await this.prisma.policyPlan.findUnique({
       where: {
         idPolicyPlan: id
       },
@@ -68,9 +53,7 @@ export class PolicyPlanService {
         Service: true
       }
     });
-    if (!services)
-      throw new NotFoundException(`Policy plan not found`);
-    return services;
+    return policyPlans;
   }
 
 

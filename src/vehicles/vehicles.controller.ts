@@ -1,52 +1,89 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, ConflictException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, ConflictException, HttpException, UnprocessableEntityException, UnauthorizedException, BadRequestException, Request } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
-import { UpdateVehicleDto } from './dto/update-vehicle.dto';
-import { Public } from 'src/skipAuth.decorator';
+import { RoleDriver } from 'src/roleAuth.decorator';
+import { UsersService } from 'src/users/users.service';
+import { PoliciesService } from 'src/policies/policies.service';
 
 @Controller('vehicles')
 export class VehiclesController {
-  constructor(private readonly vehiclesService: VehiclesService) {}
+  constructor(private readonly vehiclesService: VehiclesService, private readonly usersService: UsersService, private readonly policiesService: PoliciesService) { }
 
-  @Get()
-  findAll() {
-    return this.vehiclesService.findAll();
-  }
-
-  @Public()
   @Get('/colors')
   async findColors() {
-    return await this.vehiclesService.findColors();
+    try {
+      const colors = await this.vehiclesService.findColors();
+      if (!colors) {
+        throw new NotFoundException(`Colors not found`);
+      }
+      return colors;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new UnprocessableEntityException("Error getting the colors");
+    }
+
   }
 
-  @Public()
   @Get('/services')
   async findServiceVehicle() {
-    return await this.vehiclesService.findServices();
+    try {
+      const serviceVehicle = await this.vehiclesService.findServices();
+      if (!serviceVehicle) {
+        throw new NotFoundException(`Service not found`);
+      }
+      return serviceVehicle;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new UnprocessableEntityException("Error getting the vehicle services");
+    }
+
   }
 
-  @Public()
   @Get('/types')
   async findType() {
-    return await this.vehiclesService.findTypes();
-  }
-
-  @Public()
-  @Get('/plates/:plates')
-  async validatePlates(@Param('plates') id: string) {
-    const plates = await this.vehiclesService.validatePlates(id);
-    if(plates){
-      throw new ConflictException("Plates found");
+    try {
+      const types = await this.vehiclesService.findTypes();
+      if (!types) {
+        throw new NotFoundException(`Types not found`);
+      }
+      return types;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new UnprocessableEntityException("Error getting the vehicle types");
     }
-    return; 
+
   }
 
-  @Public()
-  @Get(':plates')
-  findOne(@Param('plates') id: string) {
-    return this.vehiclesService.findOne(id);
-  }
+  @RoleDriver()
+  @Get('/plates/:plates')
+  async validatePlates(@Request() req, @Param('plates') plates: string) {
+    try {
+      const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
+      if (idUser <= 0) {
+        throw new BadRequestException("Driver doesnt exists");
+      }
 
-  
+      const vehicle = await this.vehiclesService.validatePlates(plates);
+      if (vehicle) {
+        const numberValidPoliciesWithPlates = await this.policiesService.vehicleWithValidPolicies(plates, idUser);
+        if(numberValidPoliciesWithPlates > 0){
+          throw new ConflictException("Plates found with a valid policy");
+        }       
+      }
+      
+      return;
+
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new UnprocessableEntityException("Error validating the plates");
+    }
+  }
 
 }

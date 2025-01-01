@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, ParseUUIDPipe, UnprocessableEntityException, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards, NotFoundException, HttpException, UnprocessableEntityException, ValidationPipe, ParseUUIDPipe } from '@nestjs/common';
 import { PolicyPlanService } from './policy-plan.service';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
 import { Public } from 'src/skipAuth.decorator';
+import { RoleDriver } from 'src/roleAuth.decorator';
 
 @Controller('policy-plan')
 export class PolicyPlanController {
@@ -22,40 +23,38 @@ export class PolicyPlanController {
     }
   }
 
-  @Public()
+  @RoleDriver()
   @Get("/current")
-  async findAllCurrent() {
-    return await this.policyPlanService.findAllCurrent();
-  }
-
-
-  @Public()
-  @Get()
-  async findAll() {
+  async findCurrentPlanPolicies() {
     try {
-      return await this.policyPlanService.findAll();
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
+      const policyPlans = await this.policyPlanService.findAllCurrent();
+      if (!policyPlans || policyPlans.length <= 0)
+        throw new NotFoundException(`Policies plans not found`);
+      return policyPlans;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
       }
-      throw new UnprocessableEntityException("Error Inesperado");
+      throw new UnprocessableEntityException("Error getting the current plans");
     }
   }
 
-  @Public()
   @Get(':id')
-  findOnePlanPolicy(@Param("id", ParseUUIDPipe) id: string) {
+  async findOnePlanPolicy(@Param('id') id: string) {
     try {
-      return this.policyPlanService.findPlanPolicy(id);
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
+      const policyPlans = await this.policyPlanService.findPlanPolicy(id);
+      if (!policyPlans)
+        throw new NotFoundException(`Policy plan not found`);
+
+      return policyPlans;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
       }
       throw new UnprocessableEntityException("Error getting policy plan");
     }
   }
 
-  @Public()
   @Patch(':id')
   update(@Param("id", ParseUUIDPipe) id: string, @Body(ValidationPipe) updatePolicyPlanDto: UpdatePolicyPlanDto) {
     try {
@@ -68,7 +67,6 @@ export class PolicyPlanController {
     }
   }
 
-  @Public()
   @Delete(':id')
   async remove(@Param("id", ParseUUIDPipe) id: string) {
     try {

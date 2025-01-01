@@ -3,9 +3,10 @@ import { PoliciesService } from './policies.service';
 import { PoliciesController } from './policies.controller';
 import { PrismaService } from 'src/prisma.service';
 import { VehiclesService } from 'src/vehicles/vehicles.service';
+import { UsersService } from 'src/users/users.service';
 
 @Module({
   controllers: [PoliciesController],
-  providers: [PoliciesService, PrismaService, VehiclesService],
+  providers: [PoliciesService, PrismaService, VehiclesService, UsersService],
 })
 export class PoliciesModule {}
