@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, BadRequestException, ValidationPipe, ParseUUIDPipe, UnprocessableEntityException, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, ParseUUIDPipe, UnprocessableEntityException, HttpException } from '@nestjs/common';
 import { PolicyPlanService } from './policy-plan.service';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
@@ -12,13 +12,13 @@ export class PolicyPlanController {
   @Post()
   async create(@Body(ValidationPipe) createPolicyPlanDto: CreatePolicyPlanDto) {
     try {
-      const nuevaPlanPoliza = await this.policyPlanService.create(createPolicyPlanDto);
-      return nuevaPlanPoliza;
+      const newPolicyPlan = await this.policyPlanService.create(createPolicyPlanDto);
+      return newPolicyPlan;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new UnprocessableEntityException("Error Inesperado");
+      throw new UnprocessableEntityException("Error creating policy plan");
     }
   }
 
@@ -51,7 +51,7 @@ export class PolicyPlanController {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new UnprocessableEntityException("Error Inesperado");
+      throw new UnprocessableEntityException("Error getting policy plan");
     }
   }
 
@@ -64,7 +64,7 @@ export class PolicyPlanController {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new UnprocessableEntityException("Error Inesperado");
+      throw new UnprocessableEntityException("Error updating policy plan");
     }
   }
 
@@ -77,7 +77,7 @@ export class PolicyPlanController {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new UnprocessableEntityException("Error Inesperado");
+      throw new UnprocessableEntityException("Error removing policy plan");
     }
   }
 }

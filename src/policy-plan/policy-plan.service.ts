@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { UnprocessableEntityException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -8,7 +8,7 @@ export class PolicyPlanService {
   constructor(private prisma: PrismaService) { }
 
   async create(createPolicyPlanDto: CreatePolicyPlanDto) {
-      const crearPolicyPlan = await this.prisma.policyPlan.create({
+      const newPolicyPlan = await this.prisma.policyPlan.create({
         data: {
           title: createPolicyPlanDto.title,
           description: createPolicyPlanDto.description,
@@ -26,7 +26,7 @@ export class PolicyPlanService {
         include: { Service: true },
       });
 
-      return crearPolicyPlan;
+      return newPolicyPlan;
   }
 
   async findAllCurrent() {
@@ -77,9 +77,9 @@ export class PolicyPlanService {
   async update(id: string, updatePolicyPlanDto: UpdatePolicyPlanDto) {
       const recuperarPolicyPlan = await this.prisma.policyPlan.findFirst({ where: { idPolicyPlan: id } });
       if (!recuperarPolicyPlan) {
-        throw new NotFoundException("Poliza no encontrada")
+        throw new NotFoundException("Policy plan not found")
       }
-      const actualizarPolicyPlan = await this.prisma.policyPlan.update({
+      const updatePolicyPlan = await this.prisma.policyPlan.update({
         where: { idPolicyPlan: id },
         data: {
           title: updatePolicyPlanDto.title,
@@ -98,15 +98,15 @@ export class PolicyPlanService {
         },
         include: { Service: true },
       });
-      return actualizarPolicyPlan;
+      return updatePolicyPlan;
   }
 
   async remove(id: string) {
-      const recuperarPolicyPlan = await this.prisma.policyPlan.findFirst({ where: { idPolicyPlan: id } });
-      if (!recuperarPolicyPlan) {
-        throw new NotFoundException("Poliza no encontrada")
+      const policyPlan = await this.prisma.policyPlan.findFirst({ where: { idPolicyPlan: id } });
+      if (!policyPlan) {
+        throw new NotFoundException("Policy not found")
       }
-      const [eliminarService, eliminarPolicyPlan] = await this.prisma.$transaction([
+      const [deleteService, deletePolicyPlan] = await this.prisma.$transaction([
         this.prisma.service.deleteMany({
           where: { idPolicyPlan: id },
         }),
@@ -114,9 +114,9 @@ export class PolicyPlanService {
           where: { idPolicyPlan: id },
         }),
       ]);
-      if (!eliminarPolicyPlan) {
-        throw new BadRequestException("La poliza no se pudo eliminar");
+      if (!deletePolicyPlan) {
+        throw new UnprocessableEntityException("Error removing policy plan");
       }
-      return eliminarPolicyPlan;;
+      return deletePolicyPlan;;
   }
 }
