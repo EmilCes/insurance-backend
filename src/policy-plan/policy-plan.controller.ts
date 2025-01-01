@@ -16,6 +16,7 @@ export class PolicyPlanController {
       const newPolicyPlan = await this.policyPlanService.create(createPolicyPlanDto);
       return newPolicyPlan;
     } catch (error) {
+      console.log(error);
       if (error instanceof HttpException) {
         throw error;
       }
@@ -40,6 +41,7 @@ export class PolicyPlanController {
   }
 
   @Get(':id')
+  @Public()
   async findOnePlanPolicy(@Param('id') id: string) {
     try {
       const policyPlans = await this.policyPlanService.findPlanPolicy(id);
@@ -56,6 +58,7 @@ export class PolicyPlanController {
   }
 
   @Patch(':id')
+  @Public()
   update(@Param("id", ParseUUIDPipe) id: string, @Body(ValidationPipe) updatePolicyPlanDto: UpdatePolicyPlanDto) {
     try {
       return this.policyPlanService.update(id, updatePolicyPlanDto);

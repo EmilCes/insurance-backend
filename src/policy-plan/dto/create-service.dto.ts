@@ -8,6 +8,6 @@ export class Service {
     isCovered: boolean;
 
     @IsNumber()
-    @Min(0)
+    @Min(1)
     coveredCost: number;
 }

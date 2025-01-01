@@ -26,10 +26,10 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "title": "Ejemplo",
+    "title": "EjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemplo",
     "description": "Ejemplo",
     "maxPeriod": 12,
-    "basePrice":  10.50,
+    "basePrice":  10,
     "service": [
         {
             "name": "Service1",
@@ -39,7 +39,7 @@ Content-Type: application/json
         {
             "name": "Service2",
             "isCovered": true,
-            "coveredCost": 0.00
+            "coveredCost": 1.00
         }
     ]
 }
@@ -76,11 +76,6 @@ Content-Type: application/json
     "maxPeriod": 21323,
     "basePrice":  102.50,
     "service": [
-        {
-            "name": "hola",
-            "isCovered": true,
-            "coveredCost": 50.00
-        }
     ]
 }
 ### Error
@@ -111,7 +106,7 @@ Content-Type: application/json
     
 ###
 
-PATCH http://localhost:3002/policy-plan/9f4ca11f-d584-4c67-a20d-bb7b272071cb
+PATCH http://localhost:3002/policy-plan/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -129,7 +124,7 @@ Content-Type: application/json
         {
             "name": "MODIFICADO3",
             "isCovered": true,
-            "coveredCost": 0.00
+            "coveredCost": 1.00
         }
     ]
 }
@@ -139,4 +134,14 @@ Content-Type: application/json
 ##Falta editar, falta recuperar todas, falta insertar reporte
 
 DELETE http://localhost:3002/policy-plan/834adc30-6069-4a7c-b304-88ac5f67856c
+Authorization: Bearer {{token}}
+
+
+
+###
+
+GET http://localhost:3002/policy-plan/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
+Authorization: Bearer {{token}}
+###
+GET http://localhost:3002/policy-plan/834adc30-6069-4a7c-b304-88ac5f67856c
 Authorization: Bearer {{token}}

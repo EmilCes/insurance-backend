@@ -10,12 +10,12 @@ export class CreatePolicyPlanDto {
     @Length(1, 255)  
     description: string;
 
-    @Min(0)  
+    @Min(1)  
     @IsInt()
     maxPeriod: number;
 
     @IsNumber()
-    @Min(0)  
+    @Min(1)  
     basePrice: number;
 
     @IsArray()
