@@ -8,12 +8,13 @@ import { BrandsModule } from './brands/brands.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { PoliciesModule } from './policies/policies.module';
 import { PolicyPlanModule } from './policy-plan/policy-plan.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
     envFilePath: '.env'
-  }), AuthModule, UsersModule, BrandsModule, VehiclesModule, PoliciesModule, PolicyPlanModule],
+  }), AuthModule, UsersModule, BrandsModule, VehiclesModule, PoliciesModule, PolicyPlanModule, ReportModule],
   controllers: [AppController],
   providers: [AppService],
 })

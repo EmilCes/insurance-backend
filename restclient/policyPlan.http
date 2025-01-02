@@ -26,7 +26,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "title": "EjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemploEjemplo",
+    "title": "Ejemplo",
     "description": "Ejemplo",
     "maxPeriod": 12,
     "basePrice":  10,
@@ -39,7 +39,7 @@ Content-Type: application/json
         {
             "name": "Service2",
             "isCovered": true,
-            "coveredCost": 1.00
+            "coveredCost": 0
         }
     ]
 }
@@ -133,15 +133,150 @@ Content-Type: application/json
 
 ##Falta editar, falta recuperar todas, falta insertar reporte
 
-DELETE http://localhost:3002/policy-plan/834adc30-6069-4a7c-b304-88ac5f67856c
+DELETE http://localhost:3002/policy-plan/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
 Authorization: Bearer {{token}}
 
 
 
-###
+###RECUPERAR EL ACTIVA EN POLIZA PLAN ||| Metodo cambiar estatus
 
 GET http://localhost:3002/policy-plan/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
 Authorization: Bearer {{token}}
 ###
-GET http://localhost:3002/policy-plan/834adc30-6069-4a7c-b304-88ac5f67856c
+GET http://localhost:3002/policy-plan/status/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
 Authorization: Bearer {{token}}
+
+
+###
+PATCH http://localhost:3002/policy-plan/status/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "idPolicyPlanStatus": 2   
+}
+
+###
+
+
+GET http://localhost:3002/policy-plan?page=3&status=0
+Authorization: Bearer {{token}}
+
+
+###        
+GET http://localhost:3002/policy-plan?page=0&status=0
+
+###
+GET http://localhost:3002/policy-plan?page=0&status=2
+
+
+
+
+###
+
+POST http://localhost:3002/report
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data
+
+file: [Selecciona una imagen desde tu sistema]
+{
+  "idReport": 1,
+  "description": "Reporte de incidencia",
+  "date": "2025-01-02",
+  "latitude": 19.123456,
+  "longitude": -98.765432,
+  "result": "Pendiente",
+  "reportDecisionDate": "2025-01-03",
+  "plates": "XYZ9876",
+  "photographDto": [
+    {
+      "idPhotograph": 1,
+      "name": "Imagen frontal"
+    }
+  ],
+  "implicatePartyDto": [
+    {
+      "idImplicateParty": 1,
+      "name": "Pedro Gómez",
+      "idModel": 201
+    }
+  ]
+}
+
+
+###
+POST http://localhost:3002/report
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "idReport": 1,
+  "description": "Este es un reporte de prueba",
+  "date": new Date("2025-01-02"),
+  "latitude": 19.432608,
+  "longitude": -99.133209,
+  "result": "Aprobado",
+  "reportDecisionDate":new Date("2025-01-02"),
+  "plates": "ABC1234",
+  "photographDto": [
+    {
+      "idPhotograph": 1,
+      "name": "Foto frontal"
+    },
+    {
+      "idPhotograph": 2,
+      "name": "Foto lateral"
+    }
+  ],
+  "implicatePartyDto": [
+    {
+      "idImplicateParty": 1,
+      "name": "Juan Pérez",
+      "idModel": 101
+    },
+    {
+      "idImplicateParty": 2,
+      "name": "María López",
+      "idModel": 102
+    }
+  ]
+}
+
+
+###
+POST http://localhost:3002/report
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "idReport": 1,
+  "description": "Este es un reporte de prueba",
+  "date": "2025-01-02T00:00:00.000Z",
+  "latitude": 19.432608,
+  "longitude": -99.133209,
+  "result": "Aprobado",
+  "reportDecisionDate": "2025-01-03T00:00:00.000Z",
+  "plates": "ABC1234",
+  "photographDto": [
+    {
+      "idPhotograph": 1,
+      "name": "Foto frontal"
+    },
+    {
+      "idPhotograph": 2,
+      "name": "Foto lateral"
+    }
+  ],
+  "implicatePartyDto": [
+    {
+      "idImplicateParty": 1,
+      "name": "Juan Pérez",
+      "idModel": 101
+    },
+    {
+      "idImplicateParty": 2,
+      "name": "María López",
+      "idModel": 102
+    }
+  ]
+}

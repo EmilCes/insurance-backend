@@ -46,6 +46,7 @@ model Model {
   idBrand Int
   Brand   Brand     @relation(fields: [idBrand], references: [idBrand])
   Vehicle Vehicle[]
+  ImplicateParty ImplicateParty[]
 }
 
 model Color {
@@ -189,9 +190,10 @@ model EmployeeType {
 model ImplicateParty {
   idImplicateParty Int    @id @default(autoincrement())
   name             String @db.VarChar(50)
-  lastName         String @db.VarChar(50)
-  idReport         Int
-  Report           Report @relation(fields: [idReport], references: [idReport])
+  idModel         Int
+  Model           Model @relation(fields: [idModel], references: [idModel])
+  idReport Int
+  Report   Report @relation(fields: [idReport], references: [idReport])
 }
 
 model Status {
