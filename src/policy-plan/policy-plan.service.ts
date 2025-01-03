@@ -1,7 +1,7 @@
 import { UnprocessableEntityException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
 import { UpdatePolicyPlanStatusDto } from './dto/update-policy-plan-status.dto';
 
 @Injectable()

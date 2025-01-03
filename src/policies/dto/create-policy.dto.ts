@@ -43,5 +43,8 @@ export class CreatePolicyDto {
     @IsNotEmpty()
     @IsUUID()
     idPolicyPlan: string;
+
+    @IsNumber()
+    @IsPositive()
     perMonthsPayment: number;
 }

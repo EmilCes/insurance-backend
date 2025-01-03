@@ -1,8 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePolicyDto } from './dto/create-policy.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
 import { Prisma } from '@prisma/client';
-import { VehiclesService } from 'src/vehicles/vehicles.service';
+import { VehiclesService } from '../vehicles/vehicles.service';
 import { equals } from 'class-validator';
 
 const numberPoliciesPerPage = 4;
@@ -10,8 +10,7 @@ const numberPoliciesPerPage = 4;
 @Injectable()
 export class PoliciesService {
   constructor(
-    private prisma: PrismaService,
-    private vehicleService: VehiclesService
+    private prisma: PrismaService
   ) { }
 
   async create(createPolicyDto: CreatePolicyDto, idUser: number) {

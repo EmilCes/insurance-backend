@@ -2,10 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundExcep
 import { PoliciesService } from './policies.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { Public } from 'src/skipAuth.decorator';
-import { RoleAdjuster, RoleDriver } from 'src/roleAuth.decorator';
+import { RoleAdjuster, RoleDriver } from '../roleAuth.decorator';
 import { isUUID } from 'class-validator';
-import { UsersService } from 'src/users/users.service';
-import { VehiclesService } from 'src/vehicles/vehicles.service';
+import { UsersService } from '../users/users.service';
+import { VehiclesService } from '../vehicles/vehicles.service';
 
 @Controller('policies')
 export class PoliciesController {
@@ -144,7 +144,7 @@ export class PoliciesController {
 
   @RoleDriver()
   @Get("/current/types")
-  async findAll(@Request() req) {
+  async findAllTypes(@Request() req) {
     try {
       const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
       if (idUser <= 0) {
