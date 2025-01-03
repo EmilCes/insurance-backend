@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class VehiclesService {
@@ -24,7 +24,7 @@ export class VehiclesService {
 
   async validatePlates(plate: string) {
     const vehicle = await this.prisma.vehicle.findUnique({
-      where: { plates: plate }
+      where: { plates: plate }, select: { plates: true}
     });
     return vehicle;
   }

@@ -260,7 +260,7 @@ export class PoliciesController {
 
   @RoleDriver()
   @Get("/current/types")
-  async findAll(@Request() req) {
+  async findAllTypes(@Request() req) {
     try {
       const idUser = await this.usersService.getIdUserFromEmail(
         req.user.username,
