@@ -8,5 +8,6 @@ import { UsersService } from 'src/users/users.service';
 @Module({
   controllers: [ReportController],
   providers: [ReportService, PrismaService, ValidationService, UsersService],
+  exports : [ValidationService]
 })
 export class ReportModule {}

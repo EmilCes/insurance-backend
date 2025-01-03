@@ -2,12 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, Unpro
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
-import { Public } from 'src/skipAuth.decorator';
+import { Public } from '../skipAuth.decorator';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ValidationService } from './validation.service';
 import { multerOptions } from './multer';
 import { CreatePhotographDto } from './dto/photograph.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { ImplicatePartyDto } from './dto/implicate-party.dto';
 
 
@@ -57,7 +57,7 @@ export class ReportController {
   @Get()
   @Public()
   async findFilter(@Request() req, @Query("page", ParseIntPipe) query: number, @Query("status", ParseIntPipe) status: number,
-    @Query("idReport") idReport?: number, @Query("firstdate") firstdate?: Date,  @Query("enddate") enddate?: Date) {
+    @Query("idReport") idReport?: number, @Query("firstdate") firstdate?: string,  @Query("enddate") enddate?: string) {
     try {
       if (query < 0) {
         throw new BadRequestException("Invalid page");

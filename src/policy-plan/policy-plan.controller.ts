@@ -3,8 +3,8 @@ import { PolicyPlanService } from './policy-plan.service';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
 import { UpdatePolicyPlanStatusDto } from './dto/update-policy-plan-status.dto';
-import { Public } from 'src/skipAuth.decorator';
-import { RoleDriver } from 'src/roleAuth.decorator';
+import { Public } from '../skipAuth.decorator';
+import { RoleDriver } from '../roleAuth.decorator';
 import { ValidationService } from './validation.service';
 
 @Controller('policy-plan')
