@@ -14,13 +14,13 @@ async function main() {
     await prisma.serviceVehicle.deleteMany({});
     await prisma.type.deleteMany({});
     await prisma.color.deleteMany({});
+    await prisma.employee.deleteMany({});
     await prisma.account.deleteMany({});
     await prisma.driver.deleteMany({});
     await prisma.municipality.deleteMany({});
     await prisma.state.deleteMany({});
     await prisma.model.deleteMany({});
     await prisma.brand.deleteMany({});
-    await prisma.employee.deleteMany({});
     await prisma.employeeType.deleteMany({});
 
     for (let item of employeeType) {
@@ -28,8 +28,6 @@ async function main() {
             data: item,
         });
     }
-
-
 
     for (let item of brands) {
         await prisma.brand.create({
