@@ -121,7 +121,7 @@ export class PolicyPlanController {
     @Query("name") name: string) {
     try {
       if (query < 0) {
-        throw new BadRequestException("Invalid page status");
+        throw new BadRequestException("Invalid page");
       }
       switch (status) {
         case 0:

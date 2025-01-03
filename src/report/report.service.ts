@@ -12,33 +12,41 @@ export class ReportService {
   async create(createReportDto: CreateReportDto, file: CreatePhotographDto[], implicateParty: ImplicatePartyDto[]) {
     const vehicle = await this.prisma.vehicle.findFirst({
       where: {
-        plates: createReportDto.plates, 
+        plates: createReportDto.plates,
       },
       select: {
-        plates: true, 
+        plates: true,
       },
     });
 
-    if(!vehicle){
+    if (!vehicle) {
       throw new NotFoundException;
     }
+
+    const formatDateToStartOfDay = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}T00:00:00.000Z`;
+    };
+
     const newReport = await this.prisma.report.create({
       data: {
         description: createReportDto.description,
-        date: new Date(),
+        date: formatDateToStartOfDay(new Date()),
         latitude: createReportDto.latitude,
         longitude: createReportDto.longitude,
         reportDecisionDate: createReportDto.reportDecisionDate || null,
         Vehicle: {
-          connect: { plates: createReportDto.plates }, 
+          connect: { plates: createReportDto.plates },
         },
         Status: {
           connect: { idStatus: 1 },
         },
         ImplicateParties: {
           create: implicateParty.map((party) => ({
-            name: party.name || null, 
-            idModel: party.idModel || null, 
+            name: party.name || null,
+            idModel: party.idModel || null,
             idColor: party.idColor || null,
           })),
         },
@@ -56,6 +64,41 @@ export class ReportService {
       },
     })
     return newReport;
+  }
+
+  async findReportPage(page: number, status: number, idReport: number, firstdatetime: string, enddatetime: string) {
+    const pageSize = 3;
+    const skip = page * pageSize;
+
+    const where: any = {};
+    if (status !== 0) {
+      where.idStatus = status;
+    }
+    if (idReport !== undefined && idReport !== null && !isNaN(idReport)) {
+      where.idReport = idReport;
+    }
+    if (firstdatetime && enddatetime) {
+      where.date = {
+        gte: new Date(firstdatetime),
+        lte: new Date(enddatetime),
+      };
+    }
+
+    let reports;
+    if (status == 0) {
+      reports = await this.prisma.report.findMany({
+        where,
+        skip,
+        take: pageSize
+      });
+    } else {
+      reports = await this.prisma.report.findMany({
+        where,
+        skip,
+        take: pageSize
+      });
+    }
+    return reports;
   }
 
   findAll() {
