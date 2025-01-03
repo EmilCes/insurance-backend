@@ -302,6 +302,7 @@ export class PoliciesService {
                 Brand: { select: { name: true } },
               },
             },
+            Color: { select: { vehicleColor: true}}
           },
         },
       },
