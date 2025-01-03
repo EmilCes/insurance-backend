@@ -232,6 +232,9 @@ CREATE TABLE "_EmployeeToReport" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Driver_idUser_key" ON "Driver"("idUser");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Account_idUser_key" ON "Account"("idUser");
 
 -- CreateIndex

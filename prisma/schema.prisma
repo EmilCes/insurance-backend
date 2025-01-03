@@ -117,7 +117,7 @@ model Driver {
   expirationDateBankAccount DateTime
   licenseNumber             String   @db.VarChar(100)
   phone                     String   @db.VarChar(10)
-  idUser                    Int      @id @default(autoincrement())
+  idUser                    Int      @id @default(autoincrement()) @unique
   Account                   Account?
   Policy                    Policy[]
   Report                    Report[]
