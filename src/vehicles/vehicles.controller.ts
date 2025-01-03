@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, ConflictException, HttpException, UnprocessableEntityException, UnauthorizedException, BadRequestException, Request } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
-import { RoleDriver } from 'src/roleAuth.decorator';
-import { UsersService } from 'src/users/users.service';
-import { PoliciesService } from 'src/policies/policies.service';
+import { RoleDriver } from '../roleAuth.decorator';
+import { UsersService } from '../users/users.service';
+import { PoliciesService } from '../policies/policies.service';
 
 @Controller('vehicles')
 export class VehiclesController {
@@ -12,7 +12,7 @@ export class VehiclesController {
   async findColors() {
     try {
       const colors = await this.vehiclesService.findColors();
-      if (!colors) {
+      if (!colors || colors.length <= 0) {
         throw new NotFoundException(`Colors not found`);
       }
       return colors;
@@ -29,7 +29,7 @@ export class VehiclesController {
   async findServiceVehicle() {
     try {
       const serviceVehicle = await this.vehiclesService.findServices();
-      if (!serviceVehicle) {
+      if (!serviceVehicle || serviceVehicle.length <= 0) {
         throw new NotFoundException(`Service not found`);
       }
       return serviceVehicle;
@@ -46,7 +46,7 @@ export class VehiclesController {
   async findType() {
     try {
       const types = await this.vehiclesService.findTypes();
-      if (!types) {
+      if (!types || types.length <= 0) {
         throw new NotFoundException(`Types not found`);
       }
       return types;
