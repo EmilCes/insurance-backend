@@ -1,49 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
+import { CreatePhotographDto } from './dto/photograph.dto';
+import { PrismaService } from 'src/prisma.service';
+import { ImplicatePartyDto } from './dto/implicate-party.dto';
 
 @Injectable()
 export class ReportService {
-  create(createReportDto: CreateReportDto, file: Express.Multer.File) {
-    if (file) {
-      console.log('Si hay imagen');
-    } else {
-      console.log('No hay imagen');
-    }
+  constructor(private prisma: PrismaService) { }
 
-    console.log('Datos del Reporte:');
-    console.log('idReport:', createReportDto.idReport);
-    console.log('description:', createReportDto.description);
-    console.log('date:', createReportDto.date);
-    console.log('latitude:', createReportDto.latitude);
-    console.log('longitude:', createReportDto.longitude);
-    console.log('result:', createReportDto.result);
-    console.log('reportDecisionDate:', createReportDto.reportDecisionDate);
-    console.log('plates:', createReportDto.plates);
+  async create(createReportDto: CreateReportDto, file: CreatePhotographDto[], implicateParty: ImplicatePartyDto[]) {
+    const vehicle = await this.prisma.vehicle.findFirst({
+      where: {
+        plates: createReportDto.plates, 
+      },
+      select: {
+        plates: true, 
+      },
+    });
 
-    console.log('Photographs:');
-    if (createReportDto.photographDto && createReportDto.photographDto.length > 0) {
-      createReportDto.photographDto.forEach((photo, index) => {
-        console.log(`Photograph ${index + 1}:`);
-        console.log('  idPhotograph:', photo.idPhotograph);
-        console.log('  name:', photo.name);
-      });
-    } else {
-      console.log('No hay fotografías');
+    if(!vehicle){
+      throw new NotFoundException;
     }
+    const newReport = await this.prisma.report.create({
+      data: {
+        description: createReportDto.description,
+        date: new Date(),
+        latitude: createReportDto.latitude,
+        longitude: createReportDto.longitude,
+        reportDecisionDate: createReportDto.reportDecisionDate || null,
+        Vehicle: {
+          connect: { plates: createReportDto.plates }, 
+        },
+        Status: {
+          connect: { idStatus: 1 },
+        },
+        ImplicateParties: {
+          create: implicateParty.map((party) => ({
+            name: party.name || null, 
+            idModel: party.idModel || null, 
+            idColor: party.idColor || null,
+          })),
+        },
+        Photographs: {
+          create: file.map((photo) => ({
+            name: photo.name,
+            url: photo.url,
+          })),
 
-    console.log('Implicate Parties:');
-    if (createReportDto.implicatePartyDto && createReportDto.implicatePartyDto.length > 0) {
-      createReportDto.implicatePartyDto.forEach((party, index) => {
-        console.log(`Implicate Party ${index + 1}:`);
-        console.log('  idImplicateParty:', party.idImplicateParty);
-        console.log('  name:', party.name);
-        console.log('  idModel:', party.idModel);
-      });
-    } else {
-      console.log('No hay implicados');
-    }
-    return 'This action adds a new report';
+        },
+      },
+      include: {
+        Photographs: true,
+        ImplicateParties: true,
+      },
+    })
+    return newReport;
   }
 
   findAll() {

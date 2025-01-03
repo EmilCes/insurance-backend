@@ -19,7 +19,6 @@ export class PolicyPlanController {
       const newPolicyPlan = await this.policyPlanService.create(createPolicyPlanDto);
       return newPolicyPlan;
     } catch (error) {
-      console.log(error);
       if (error instanceof HttpException) {
         throw error;
       }

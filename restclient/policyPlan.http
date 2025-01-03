@@ -249,21 +249,18 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "idReport": 1,
   "description": "Este es un reporte de prueba",
-  "date": "2025-01-02T00:00:00.000Z",
+  "date": "2025-01-02",
   "latitude": 19.432608,
   "longitude": -99.133209,
   "result": "Aprobado",
-  "reportDecisionDate": "2025-01-03T00:00:00.000Z",
+  "reportDecisionDate": "2025-01-03",
   "plates": "ABC1234",
   "photographDto": [
     {
-      "idPhotograph": 1,
       "name": "Foto frontal"
     },
     {
-      "idPhotograph": 2,
       "name": "Foto lateral"
     }
   ],
@@ -280,3 +277,15 @@ Content-Type: application/json
     }
   ]
 }
+
+
+
+###
+POST http://localhost:3002/report
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Este es un reporte de prueba"
+}
+

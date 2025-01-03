@@ -41,18 +41,19 @@ model Brand {
 }
 
 model Model {
-  idModel Int       @id @default(autoincrement())
-  year    String    @db.VarChar(4)
-  idBrand Int
-  Brand   Brand     @relation(fields: [idBrand], references: [idBrand])
-  Vehicle Vehicle[]
+  idModel        Int              @id @default(autoincrement())
+  year           String           @db.VarChar(4)
+  idBrand        Int
+  Brand          Brand            @relation(fields: [idBrand], references: [idBrand])
+  Vehicle        Vehicle[]
   ImplicateParty ImplicateParty[]
 }
 
 model Color {
-  idColor      Int       @id @default(autoincrement())
-  vehicleColor String    @db.VarChar(40)
-  Vehicle      Vehicle[]
+  idColor        Int              @id @default(autoincrement())
+  vehicleColor   String           @db.VarChar(40)
+  Vehicle        Vehicle[]
+  ImplicateParty ImplicateParty[]
 }
 
 model Type {
@@ -155,19 +156,19 @@ model State {
 }
 
 model Report {
-  idReport           Int              @id @default(autoincrement())
-  description        String           @db.Text
+  idReport           Int               @id @default(autoincrement())
+  description        String            @db.Text
   date               DateTime
-  latitude           Decimal          @db.Decimal(9, 6)
-  longitude          Decimal          @db.Decimal(10, 6)
-  result             String           @db.Text
-  reportDecisionDate DateTime
+  latitude           Decimal           @db.Decimal(9, 6)
+  longitude          Decimal           @db.Decimal(10, 6)
+  result             String?            @db.Text
+  reportDecisionDate DateTime?
   idStatus           Int
-  plates             String           @db.VarChar(15)
-  Vehicle            Vehicle          @relation(fields: [plates], references: [plates])
+  plates             String            @db.VarChar(15)
+  Vehicle            Vehicle           @relation(fields: [plates], references: [plates])
   ImplicateParties   ImplicateParty[]
   Photographs        Photograph[]
-  Status             Status           @relation(fields: [idStatus], references: [idStatus])
+  Status             Status            @relation(fields: [idStatus], references: [idStatus])
   Driver             Driver[]
   Employee           Employee[]
 }
@@ -188,12 +189,14 @@ model EmployeeType {
 }
 
 model ImplicateParty {
-  idImplicateParty Int    @id @default(autoincrement())
-  name             String @db.VarChar(50)
-  idModel         Int
-  Model           Model @relation(fields: [idModel], references: [idModel])
-  idReport Int
-  Report   Report @relation(fields: [idReport], references: [idReport])
+  idImplicateParty Int     @id @default(autoincrement())
+  name             String? @db.VarChar(50)
+  idModel          Int?
+  Model            Model?  @relation(fields: [idModel], references: [idModel])
+  idReport         Int
+  Report           Report  @relation(fields: [idReport], references: [idReport])
+  idColor          Int?
+  Color            Color?  @relation(fields: [idColor], references: [idColor])
 }
 
 model Status {
@@ -205,7 +208,7 @@ model Status {
 model Photograph {
   idPhotograph Int    @id @default(autoincrement())
   name         String @db.VarChar(255)
-  url          Bytes
+  url          String @db.VarChar(255)
   idReport     Int
   Report       Report @relation(fields: [idReport], references: [idReport])
 }
