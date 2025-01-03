@@ -10,8 +10,7 @@ const numberPoliciesPerPage = 4;
 @Injectable()
 export class PoliciesService {
   constructor(
-    private prisma: PrismaService,
-    private vehicleService: VehiclesService
+    private prisma: PrismaService
   ) { }
 
   async create(createPolicyDto: CreatePolicyDto, idUser: number) {
