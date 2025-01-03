@@ -243,24 +243,18 @@ Content-Type: application/json
 ###
 GET http://localhost:3002/report?page=0&status=0
 Authorization: Bearer {{token}}
-
 ###
 GET http://localhost:3002/report?page=4&status=1
 Authorization: Bearer {{token}}
-
 ###
 GET http://localhost:3002/report?page=0&status=2
 Authorization: Bearer {{token}}
-
-
 ###
 GET http://localhost:3002/report?page=0&status=0&idReport=2
 Authorization: Bearer {{token}}
-
 ###
 GET http://localhost:3002/report?page=0&status=0&firstdate=2025-01-01&enddate=2025-01-03
 Authorization: Bearer {{token}}
-
 ###
 GET http://localhost:3002/report?page=0&status=0
 Authorization: Bearer {{token}}
