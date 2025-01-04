@@ -1,109 +1,83 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
-import { CreatePhotographDto } from './dto/photograph.dto';
 import { PrismaService } from '../prisma.service';
-import { ImplicatePartyDto } from './dto/implicate-party.dto';
 
 @Injectable()
 export class ReportService {
   constructor(private prisma: PrismaService) { }
 
-  async create(createReportDto: CreateReportDto, file: CreatePhotographDto[], implicateParty: ImplicatePartyDto[]) {
-    //Buscar el idUser del Driver que crea este reporte
-    let idUser = 2
+  async create(createReportDto: CreateReportDto, files: Express.MulterS3.File[], idUser: number) {
+    
+    console.log(createReportDto)
 
-    const vehicle = await this.prisma.vehicle.findFirst({
-      where: {
-        plates: createReportDto.plates,
-      },
-      select: {
-        plates: true,
-      },
+    const policy = await this.prisma.policy.findUnique({
+      where: { serialNumber: createReportDto.serialNumber }
     });
+
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { plates: policy.plates }
+    });
+
     if (!vehicle) {
-      throw new NotFoundException('Invalid Plates.');;
+      throw new NotFoundException('Vehicle not found');
     }
 
-    const status = await this.prisma.status.findUnique({
-      where: { idStatus: 1 },
-    });
+    /*const implicatePartiesData = createReportDto.involvedPeople.map((party) => ({
+      name: party.name || null,
+      plates: party.plates || null,
+      brandId: parseInt(party.brand) || null,
+      colorId: parseInt(party.color) || null
+    }));*/
 
-    if (!status) {
-      throw new NotFoundException('Invalid Status.');
-    }
+    const photographsData = files.map((file) => ({
+      name: file.originalname,
+      url: file.location
+    }));
 
-    for (const party of implicateParty) {
-      if (party.idModel) {
-        const model = await this.prisma.model.findUnique({
-          where: { idModel: party.idModel },
-        });
-        if (!model) {
-          throw new NotFoundException(`Invalid IdModel : ${party.idModel}.`);
-        }
-      }
-
-      if (party.idColor) {
-        const color = await this.prisma.color.findUnique({
-          where: { idColor: party.idColor },
-        });
-        if (!color) {
-          throw new NotFoundException(`Invalid IdColor: ${party.idColor}`);
-        }
-      }
-    }
-
-    const user = await this.prisma.driver.findUnique({
-      where: { idUser: idUser },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`Invalid IdUser: ${idUser}`);
-    }
-
-    const formatDateToStartOfDay = (date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}T00:00:00.000Z`;
-    };
-
-    const newReport = await this.prisma.report.create({
+    const report = await this.prisma.report.create({
       data: {
-        description: createReportDto.description,
-        date: formatDateToStartOfDay(new Date()),
-        latitude: createReportDto.latitude,
-        longitude: createReportDto.longitude,
-        reportDecisionDate: createReportDto.reportDecisionDate || null,
+        description: '',
+        date: new Date(),
+        latitude: createReportDto.location.latitude,
+        longitude: createReportDto.location.longitude,
         Vehicle: {
-          connect: { plates: createReportDto.plates },
+          connect: { plates: vehicle.plates } 
         },
         Status: {
-          connect: { idStatus: 1 },
-        },
-        ImplicateParties: {
-          create: implicateParty.map((party) => ({
-            name: party.name || null,
-            idModel: party.idModel || null,
-            idColor: party.idColor || null,
-          })),
-        },
-        Photographs: {
-          create: file.map((photo) => ({
-            name: photo.name,
-            url: photo.url,
-          })),
+          connect: { idStatus: 1 }
         },
         Driver: {
-          connect: [{ idUser: idUser }],
+          connect: { idUser: idUser }
         },
+        ImplicateParties: {
+          create: createReportDto.involvedPeople.map((person) => ({
+            name: person.name,
+            plates: person.plates,
+            Brand: {
+              connect: {
+                idBrand: person.brandId
+              }
+            },
+            Color: {
+              connect: {
+                idColor: person.colorId
+              }
+            }
+          }))
+        },
+        Photographs: {
+          create: photographsData
+        }
       },
       include: {
-        Photographs: true,
         ImplicateParties: true,
-      },
-    })
-    return newReport;
+        Photographs: true,
+        Vehicle: true
+      }
+    });
+
+    return report;
   }
 
   async findReportPage(page: number, status: number, idReport: number, firstdatetime: string, enddatetime: string) {

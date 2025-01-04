@@ -1,63 +1,95 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, UnprocessableEntityException, UseInterceptors, UploadedFile, ValidationPipe, UploadedFiles, Request, BadRequestException, Put, ParseIntPipe, Query, NotFoundException } from '@nestjs/common';
-import { ReportService } from './report.service';
-import { CreateReportDto } from './dto/create-report.dto';
-import { UpdateReportDto } from './dto/update-report.dto';
-import { Public } from '../skipAuth.decorator';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ValidationService } from './validation.service';
-import { multerOptions } from './multer';
-import { CreatePhotographDto } from './dto/photograph.dto';
-import { UsersService } from '../users/users.service';
-import { ImplicatePartyDto } from './dto/implicate-party.dto';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Request,
+  UnprocessableEntityException,
+  UploadedFiles,
+  UseInterceptors,
+  ValidationPipe,
+} from "@nestjs/common";
+import { ReportService } from "./report.service";
+import { CreateReportDto } from "./dto/create-report.dto";
+import { UpdateReportDto } from "./dto/update-report.dto";
+import { Public } from "../skipAuth.decorator";
+import { FilesInterceptor } from "@nestjs/platform-express";
+import { ValidationService } from "./validation.service";
+import { UsersService } from "../users/users.service";
 
+import { AwsConfigService } from "src/AWS/aws-config.service";
+import { RoleDriver } from "src/roleAuth.decorator";
+import { FormDataRequest } from "nestjs-form-data";
 
-@Controller('report')
+@Controller("reports")
 export class ReportController {
-  constructor(private readonly reportService: ReportService, private readonly validationService: ValidationService, private readonly usersService: UsersService) { }
+  constructor(
+    private readonly reportService: ReportService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Post()
-  @Public()
-  @UseInterceptors(FilesInterceptor('photographs', 8, multerOptions))
-  async create(@Request() req,
-    @UploadedFiles() files: Array<Express.Multer.File>,
+  //@FormDataRequest()
+  @RoleDriver()
+  @UseInterceptors(FilesInterceptor("images", 8))
+  async create(
+    @Request() req,
+    @UploadedFiles() files: Array<Express.MulterS3.File>,
     @Body(ValidationPipe) createReportDto: CreateReportDto,
   ) {
+    console.log("Archivos subidos:", files);
+
     try {
-      const body = req.body;
-      if (body) {
-        const implicateParties = this.validationService.parseImplicatePartyDto(body);
-        createReportDto.implicatePartyDto = implicateParties;
+      const idUser = await this.usersService.getIdUserFromEmail(
+        req.user.username,
+      );
+
+      if (idUser <= 0) {
+        throw new BadRequestException("Error with the request data");
       }
-      this.validationService.validateReportData(createReportDto);
-      const photographs: CreatePhotographDto[] = files.map((file) => ({
-        name: file.originalname,
-        url: `uploads/${file.filename}`,
-      }));
-      const newReport = await this.reportService.create(createReportDto, photographs, createReportDto.implicatePartyDto);
-      return newReport;
+
+      const report = await this.reportService.create(
+        createReportDto,
+        files,
+        idUser,
+      );
+
+      return report;
+
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
       console.log(error);
-      throw new UnprocessableEntityException("Error creating policy plan");
+      throw new UnprocessableEntityException("Error creating report");
     }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReportDto: UpdateReportDto) {
+  @Patch(":id")
+  update(@Param("id") id: string, @Body() updateReportDto: UpdateReportDto) {
     return this.reportService.update(+id, updateReportDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete(":id")
+  remove(@Param("id") id: string) {
     return this.reportService.remove(+id);
   }
 
   @Get()
   @Public()
-  async findFilter(@Request() req, @Query("page", ParseIntPipe) query: number, @Query("status", ParseIntPipe) status: number,
-    @Query("idReport") idReport?: number, @Query("firstdate") firstdate?: string,  @Query("enddate") enddate?: string) {
+  async findFilter(
+    @Request() req,
+    @Query("page", ParseIntPipe) query: number,
+    @Query("status", ParseIntPipe) status: number,
+    @Query("idReport") idReport?: number,
+    @Query("firstdate") firstdate?: string,
+    @Query("enddate") enddate?: string,
+  ) {
     try {
       if (query < 0) {
         throw new BadRequestException("Invalid page");
@@ -71,15 +103,23 @@ export class ReportController {
         enddatetime = new Date(enddate).toISOString();
         firstparsedDate = new Date(firstdatetime);
         endparsedDate = new Date(enddatetime);
-        if (isNaN(firstparsedDate.getTime()) || isNaN(endparsedDate.getTime())) {
-          throw new BadRequestException('Invalid date.');
+        if (
+          isNaN(firstparsedDate.getTime()) || isNaN(endparsedDate.getTime())
+        ) {
+          throw new BadRequestException("Invalid date.");
         }
       }
       switch (status) {
         case 0:
         case 1:
         case 2:
-          const reports = await this.reportService.findReportPage(query, status, idReport, firstdatetime, enddatetime);
+          const reports = await this.reportService.findReportPage(
+            query,
+            status,
+            idReport,
+            firstdatetime,
+            enddatetime,
+          );
           if (reports.length > 0) {
             return reports;
           }
@@ -96,5 +136,4 @@ export class ReportController {
       throw new UnprocessableEntityException("Error getting the reports");
     }
   }
-
 }

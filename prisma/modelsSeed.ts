@@ -63,6 +63,11 @@ export const serviceVehicle = [
     { idService: 2, name: "Comercial" }
 ]
 
+export const status = [
+    { idStatus: 1, statusType: "Pendiente"},
+    { idStatus: 2, statusType: "Dictaminado"},
+]
+
 export const policyPlanStatus = [
     { idPolicyPlanStatus: 1, policyPlanStatusType: "Vigente" },
     { idPolicyPlanStatus: 2, policyPlanStatusType: "No vigente" }

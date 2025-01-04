@@ -38,6 +38,7 @@ model Brand {
   idBrand Int     @id @default(autoincrement())
   name    String  @db.VarChar(100)
   Model   Model[]
+  ImplicateParty ImplicateParty[]
 }
 
 model Model {
@@ -46,7 +47,6 @@ model Model {
   idBrand        Int
   Brand          Brand            @relation(fields: [idBrand], references: [idBrand])
   Vehicle        Vehicle[]
-  ImplicateParty ImplicateParty[]
 }
 
 model Color {
@@ -191,11 +191,13 @@ model EmployeeType {
 model ImplicateParty {
   idImplicateParty Int     @id @default(autoincrement())
   name             String? @db.VarChar(50)
-  idModel          Int?
-  Model            Model?  @relation(fields: [idModel], references: [idModel])
+  plates           String? @db.VarChar(50)
+  idBrand          Int?
   idReport         Int
-  Report           Report  @relation(fields: [idReport], references: [idReport])
   idColor          Int?
+
+  Brand            Brand?  @relation(fields: [idBrand], references: [idBrand])
+  Report           Report  @relation(fields: [idReport], references: [idReport])
   Color            Color?  @relation(fields: [idColor], references: [idColor])
 }
 
