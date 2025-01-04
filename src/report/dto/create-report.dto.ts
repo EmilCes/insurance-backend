@@ -1,43 +1,39 @@
 import { Type } from 'class-transformer';
-import { IsString, IsNumber, Length, Matches, IsArray, ValidateNested, Min, Max, IsInt, ArrayMinSize, IsDecimal, IsDate } from 'class-validator';
-import { PhotographDto } from './photograph.dto';
+import { IsString, IsNumber, Length, Matches, IsArray, ValidateNested, Min, Max, IsInt, ArrayMinSize, IsDecimal, IsDate, IsNotEmpty, IsOptional } from 'class-validator';
+import { CreatePhotographDto } from './photograph.dto';
 import { ImplicatePartyDto } from './implicate-party.dto';
 
 export class CreateReportDto {
-    @IsInt()
-    idReport: number;
-
     @IsString()
     description: string;
 
-    @IsDate()
-    date: Date;
-
-    @IsDecimal({ decimal_digits: '1,9' })
+    @Type(() => Number)
+    @IsNumber({}, { message: 'latitude must be a number' })
+    @IsNotEmpty()
+    @Min(-90)
+    @Max(90)
     latitude: number;
 
-    @IsDecimal({ decimal_digits: '1,10' })
+    @Type(() => Number)
+    @IsNumber({}, { message: 'latitude must be a number' })
+    @IsNotEmpty()
+    @Min(-180)
+    @Max(180)
     longitude: number;
 
-    @IsString()
-    result: string;
-
+    @Type(() => Date)
     @IsDate()
+    @IsOptional()
     reportDecisionDate: Date;
-
-    @Length(1, 9)
-    plates: string;
-
-    @IsArray()
-    @ArrayMinSize(1)
-    @ValidateNested({ each: true }) 
-    @Type(() => PhotographDto)  
-    photographDto: PhotographDto[];
-
-    @IsArray()
-    @ArrayMinSize(1)
-    @ValidateNested({ each: true }) 
-    @Type(() => ImplicatePartyDto)  
-    implicatePartyDto: ImplicatePartyDto[];
     
+    @Length(1, 9)
+    @IsNotEmpty()
+    plates: string;
+    
+    @IsArray()
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => ImplicatePartyDto)
+    implicatePartyDto?: ImplicatePartyDto[];
+
 }

@@ -1,17 +1,36 @@
 import { PrismaClient } from "@prisma/client";
-import { state, municipality, drivers, account, colors, type, serviceVehicle, policyPlanStatus, policyPlans, policyPlansServices, brands, models, employeeType, employee, vehicle, policies, policyServices } from "./modelsSeed";
+import { state, municipality, drivers, account, colors, type, serviceVehicle, policyPlanStatus, policyPlans, policyPlansServices, brands, models, employeeType, employee, vehicle, policies, policyServices, status } from "./modelsSeed";
 
 const prisma = new PrismaClient();
 
 async function main() {
+
+    await prisma.policyService.deleteMany({});
+    await prisma.policy.deleteMany({});
+    await prisma.vehicle.deleteMany({});
+    await prisma.service.deleteMany({});
+    await prisma.policyPlan.deleteMany({});
+    await prisma.policyPlanStatus.deleteMany({});
+    await prisma.serviceVehicle.deleteMany({});
+    await prisma.type.deleteMany({});
+    await prisma.color.deleteMany({});
+    await prisma.account.deleteMany({});
+    await prisma.driver.deleteMany({});
+    await prisma.municipality.deleteMany({});
+    await prisma.state.deleteMany({});
+    await prisma.model.deleteMany({});
+    await prisma.brand.deleteMany({});
+    await prisma.employee.deleteMany({});
+    await prisma.employeeType.deleteMany({});
+
     for (let item of employeeType) {
         await prisma.employeeType.create({
             data: item,
         });
     }
 
-    for (let item of employee) {
-        await prisma.employee.create({
+    for (let item of status) {
+        await prisma.status.create({
             data: item,
         });
     }
@@ -102,6 +121,12 @@ async function main() {
 
     for (let item of policyServices) {
         await prisma.policyService.create({
+            data: item,
+        });
+    }
+
+    for (let item of employee) {
+        await prisma.employee.create({
             data: item,
         });
     }

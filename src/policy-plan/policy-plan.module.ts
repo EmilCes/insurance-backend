@@ -3,9 +3,10 @@ import { PolicyPlanService } from './policy-plan.service';
 import { PolicyPlanController } from './policy-plan.controller';
 import { PrismaService } from '../prisma.service';
 import { ValidationService } from './validation.service';
+import { UsersService } from 'src/users/users.service';
 
 @Module({
   controllers: [PolicyPlanController],
-  providers: [PolicyPlanService,PrismaService, ValidationService],
+  providers: [PolicyPlanService,PrismaService, ValidationService, UsersService],
 })
 export class PolicyPlanModule {}

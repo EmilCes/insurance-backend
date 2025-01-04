@@ -63,46 +63,6 @@ Content-Type: application/json
         }
     ]
 }
-
-
-### 
-POST http://localhost:3002/policy-plan
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "title":"TituloNuevo",
-    "description": "EjemploNuevo",
-    "maxPeriod": 21323,
-    "basePrice":  102.50,
-    "service": [
-    ]
-}
-### Error
-POST http://localhost:3002/policy-plan
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "title": "tituloPolicyService",
-    "description": "tituloPolicyService",
-    "maxPeriod": 12,
-    "basePrice":  10.50
-}
-
-
-### Error Guard
-POST http://localhost:3002/policy-plan
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "title": "12345678901234567890123456789012345678901234567890",
-    "description": "tituloPolicy5",
-    "maxPeriod": 12,
-    "basePrice":  10.50
-}
-
     
 ###
 
@@ -131,21 +91,9 @@ Content-Type: application/json
 
 ### NO TIENE PUT
 
-##Falta editar, falta recuperar todas, falta insertar reporte
 
 DELETE http://localhost:3002/policy-plan/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
 Authorization: Bearer {{token}}
-
-
-
-###RECUPERAR EL ACTIVA EN POLIZA PLAN ||| Metodo cambiar estatus
-
-GET http://localhost:3002/policy-plan/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
-Authorization: Bearer {{token}}
-###
-GET http://localhost:3002/policy-plan/status/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
-Authorization: Bearer {{token}}
-
 
 ###
 PATCH http://localhost:3002/policy-plan/status/d3ed097b-2e29-4dbd-b043-46e0d99fcdab
@@ -159,15 +107,17 @@ Content-Type: application/json
 ###
 
 
-GET http://localhost:3002/policy-plan?page=3&status=0
+GET http://localhost:3002/policy-plan?page=0&status=0
 Authorization: Bearer {{token}}
 
 
 ###        
-GET http://localhost:3002/policy-plan?page=0&status=0
+GET http://localhost:3002/policy-plan?page=0&status=1
+Authorization: Bearer {{token}}
 
 ###
 GET http://localhost:3002/policy-plan?page=0&status=2
+Authorization: Bearer {{token}}
 
 
 
@@ -249,21 +199,18 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "idReport": 1,
   "description": "Este es un reporte de prueba",
-  "date": "2025-01-02T00:00:00.000Z",
+  "date": "2025-01-02",
   "latitude": 19.432608,
   "longitude": -99.133209,
   "result": "Aprobado",
-  "reportDecisionDate": "2025-01-03T00:00:00.000Z",
+  "reportDecisionDate": "2025-01-03",
   "plates": "ABC1234",
   "photographDto": [
     {
-      "idPhotograph": 1,
       "name": "Foto frontal"
     },
     {
-      "idPhotograph": 2,
       "name": "Foto lateral"
     }
   ],
@@ -280,3 +227,35 @@ Content-Type: application/json
     }
   ]
 }
+
+
+
+###
+POST http://localhost:3002/report
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Este es un reporte de prueba"
+}
+
+
+###
+GET http://localhost:3002/report?page=0&status=0
+Authorization: Bearer {{token}}
+###
+GET http://localhost:3002/report?page=4&status=1
+Authorization: Bearer {{token}}
+###
+GET http://localhost:3002/report?page=0&status=2
+Authorization: Bearer {{token}}
+###
+GET http://localhost:3002/report?page=0&status=0&idReport=2
+Authorization: Bearer {{token}}
+###
+GET http://localhost:3002/report?page=0&status=0&firstdate=2025-01-01&enddate=2025-01-03
+Authorization: Bearer {{token}}
+###
+GET http://localhost:3002/report?page=0&status=0
+Authorization: Bearer {{token}}
+

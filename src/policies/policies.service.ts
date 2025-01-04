@@ -259,7 +259,6 @@ export class PoliciesService {
     return policies;
   }
 
-
   async vehicleWithValidPolicies(plates: string, idUser: number) {
     const policiesWithPlate = await this.prisma.policy.findMany({
       where: { plates: { equals: plates }, idUser: idUser },
@@ -280,6 +279,47 @@ export class PoliciesService {
     }
     return 0;
   }
+
+  async findAllActivePoliciesByUser(idUser: number) {
+    const currentDate = new Date();
+  
+    // Obtiene todas las pólizas no canceladas del usuario
+    const policies = await this.prisma.policy.findMany({
+      where: {
+        idUser: idUser,
+        isCanceled: false,
+      },
+      select: {
+        serialNumber: true,
+        startDate: true,
+        yearsPolicy: true,
+        Vehicle: {
+          select: {
+            Model: {
+              select: {
+                year: true,
+                Brand: { select: { name: true } },
+              },
+            },
+            Color: { select: { vehicleColor: true}}
+          },
+        },
+      },
+    });
+  
+    const activePolicies = policies.filter((policy) => {
+      const start = new Date(policy.startDate);
+      const endDate = new Date(
+        start.getFullYear() + policy.yearsPolicy,
+        start.getMonth(),
+        start.getDate()
+      );
+      return endDate >= currentDate;
+    });
+  
+    return activePolicies;
+  }
+  
 
 }
 
