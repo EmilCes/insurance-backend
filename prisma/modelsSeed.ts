@@ -8,6 +8,11 @@ export const employee = [
     { idEmployee: 1, employeeNumber: 1, idEmployeeType: 1 }
 ]
 
+export const status = [
+    { idStatus: 1, statusType: "Vigente" },
+    { idStatus: 2, statusType: "No vigente" }
+]
+
 export const state = [
     { idState: 1, stateName: "Veracruz" },
     { idState: 2, stateName: "Puebla" }
@@ -125,7 +130,7 @@ export const vehicle = [
 export const policies = [
     {
         serialNumber: "0cafd594-2186-4f3a-851d-9ef334e3acaa", monthsOfPayment: 4, yearsPolicy: 3, isCanceled: false, coveredCost: 12330,
-        startDate: new Date("2024-12-12"), planTitle: "Limitada", planDescription: "Cubre la Responsabilidad Civil, Asistencia Legal, Gastos médicos a ocupantes y Robo Total",
+        startDate: new Date("2024-12-12"), planTitle: "Amplia Plus", planDescription: "Cubre la Responsabilidad Civil, Asistencia Legal, Gastos médicos a ocupantes y Robo Total",
         idPolicyPlan: "a09be575-f839-4ba1-bfd9-e64c3f59e1b8", plates: "AAA-01-01", idUser: 1
     }
 ]
