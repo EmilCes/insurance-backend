@@ -104,7 +104,7 @@ CREATE TABLE "Policy" (
     "startDate" TIMESTAMP(3) NOT NULL,
     "planTitle" VARCHAR(30) NOT NULL,
     "planDescription" VARCHAR(255) NOT NULL,
-    "idPolicyPlan" TEXT NOT NULL,
+    "idPolicyPlan" TEXT,
     "plates" TEXT NOT NULL,
     "idUser" INTEGER NOT NULL,
 
@@ -274,7 +274,7 @@ ALTER TABLE "Vehicle" ADD CONSTRAINT "Vehicle_idType_fkey" FOREIGN KEY ("idType"
 ALTER TABLE "PolicyService" ADD CONSTRAINT "PolicyService_serialNumber_fkey" FOREIGN KEY ("serialNumber") REFERENCES "Policy"("serialNumber") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Policy" ADD CONSTRAINT "Policy_idPolicyPlan_fkey" FOREIGN KEY ("idPolicyPlan") REFERENCES "PolicyPlan"("idPolicyPlan") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Policy" ADD CONSTRAINT "Policy_idPolicyPlan_fkey" FOREIGN KEY ("idPolicyPlan") REFERENCES "PolicyPlan"("idPolicyPlan") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Policy" ADD CONSTRAINT "Policy_idUser_fkey" FOREIGN KEY ("idUser") REFERENCES "Driver"("idUser") ON DELETE RESTRICT ON UPDATE CASCADE;

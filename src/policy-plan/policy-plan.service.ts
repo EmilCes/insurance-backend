@@ -102,6 +102,13 @@ export class PolicyPlanService {
     if (!policyPlan) {
       throw new NotFoundException("Policy not found")
     }
+    const policy = await this.prisma.policy.findFirst({ where: { idPolicyPlan: id } });
+    if (policy) {
+      await this.prisma.policy.update({
+        where: { serialNumber: policy.serialNumber },
+        data: { idPolicyPlan: null },
+      });
+    }
     const [deleteService, deletePolicyPlan] = await this.prisma.$transaction([
       this.prisma.service.deleteMany({
         where: { idPolicyPlan: id },
