@@ -3,9 +3,9 @@ import { PolicyPlanService } from './policy-plan.service';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
 import { UpdatePolicyPlanStatusDto } from './dto/update-policy-plan-status.dto';
-import { Public } from '../skipAuth.decorator';
 import { RoleAdmin, RoleDriver } from '../roleAuth.decorator';
 import { ValidationService } from './validation.service';
+import { Public } from 'src/skipAuth.decorator';
 
 @Controller('policy-plan')
 export class PolicyPlanController {
@@ -42,8 +42,9 @@ export class PolicyPlanController {
     }
   }
 
+  @Public()
   @Get(':id')
-  @RoleAdmin()
+  @Public()
   async findOnePlanPolicy(@Param('id') id: string) {
     try {
       const policyPlans = await this.policyPlanService.findPlanPolicy(id);

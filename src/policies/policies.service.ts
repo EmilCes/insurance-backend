@@ -34,7 +34,7 @@ export class PoliciesService {
     let policyCreated = null;
 
     await this.prisma.$transaction(async (prisma) => {
-      const policyVehicle = await this.prisma.vehicle.create({
+      const policyVehicle = await prisma.vehicle.create({
         data: {
           plates: createPolicyDto.plates,
           serialNumberVehicle: createPolicyDto.series,
@@ -46,7 +46,7 @@ export class PoliciesService {
         }
       });
 
-      const policy = await this.prisma.policy.create({
+      const policy = await prisma.policy.create({
         data: {
           monthsOfPayment: createPolicyDto.perMonthsPayment,
           yearsPolicy: createPolicyDto.yearOfPolicy,
@@ -63,7 +63,7 @@ export class PoliciesService {
 
       for (let index = 0; index < policyPlan.Service.length; index++) {
         const service = policyPlan.Service[index];
-        const policyService = await this.prisma.policyService.create({
+        await prisma.policyService.create({
           data: {
             name: service.name,
             isCovered: service.isCovered,
@@ -72,6 +72,7 @@ export class PoliciesService {
           },
         });
       }
+      
       policyCreated = {
         serialNumber: policy.serialNumber, planTitle: policy.planTitle,
         planDescription: policy.planDescription
