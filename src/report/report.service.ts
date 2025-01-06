@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateReportDto } from "./dto/create-report.dto";
-import { UpdateReportDto } from "./dto/update-report.dto";
 import { PrismaService } from "../prisma.service";
+import { AssignReportDto } from "./dto/assign-report.dto";
+import { UpdateReportDictumDto } from "./dto/update-dictum.dto";
 
 @Injectable()
 export class ReportService {
@@ -79,9 +80,9 @@ export class ReportService {
     return report.reportNumber;
   }
 
-  async findReportByReportNumber(reportNumber: string) {
+  async findReportByFilters(filters: any) {
     return this.prisma.report.findUnique({
-      where: { reportNumber: reportNumber },
+      where: filters,
       select: {
         idReport: true,
         date: true,
@@ -119,6 +120,7 @@ export class ReportService {
             },
           },
         },
+        AssignedEmployee: true
       },
     });
   }
@@ -163,6 +165,7 @@ export class ReportService {
             },
           },
         },
+        AssignedEmployee: true,
       },
       skip,
       take,
@@ -175,13 +178,9 @@ export class ReportService {
     });
   }
 
-  /*hasAccessToReport(userId: number, reportId: number): boolean {
-    if ()
-  }*/
-
-  async findDetailedReportByReportNumber(reportNumber: string) {
+  async findDetailedReportByReportNumber(filters: any) {
     return this.prisma.report.findUnique({
-      where: { reportNumber: reportNumber },
+      where: filters,
       select: {
         idReport: true,
         reportNumber: true,
@@ -190,6 +189,7 @@ export class ReportService {
         reportDecisionDate: true,
         latitude: true,
         longitude: true,
+        result: true,
         Status: {
           select: {
             statusType: true,
@@ -307,5 +307,67 @@ export class ReportService {
     }
 
     return reportNumber;
+  }
+
+  async assignReport(reportNumber: string, assignReportDto: AssignReportDto) {
+    const { assignedEmployeeId } = assignReportDto;
+
+    const report = await this.prisma.report.findUnique({
+      where: { reportNumber: reportNumber }
+    });
+
+    if (!report) {
+      throw new NotFoundException('Reporte no encontrado');
+    }
+
+    const employee = await this.prisma.employee.findUnique({
+      where: { idEmployee: assignedEmployeeId },
+      include: { EmployeeType: true }
+    });
+
+    if (!employee || employee.EmployeeType.idEmployeeType !== 3) {
+      throw new NotFoundException('Ajustador no encontrado o no es del tipo ajustador');
+    }
+
+    return this.prisma.report.update({
+      where: { reportNumber: reportNumber },
+      data: { assignedEmployeeId }
+    })
+  }
+
+  async updateReportDictum(
+    reportNumber: string,
+    updateReportDictumDto: UpdateReportDictumDto,
+    idEmployee: number
+  ) {
+    const report = await this.prisma.report.findUnique({
+      where: { reportNumber: reportNumber }
+    });
+
+    if (!report) {
+      throw new NotFoundException( `No se encontró el reporte con número de folio ${reportNumber}`);
+    }
+
+    if (report.assignedEmployeeId !== idEmployee) {
+      throw new ForbiddenException('No tienes acceso para modificar este reporte');
+    }
+
+    await this.prisma.report.update({
+      where: {
+        reportNumber: reportNumber
+      },
+      data: {
+        result: updateReportDictumDto.result,
+        Status: {
+          connect: {
+            idStatus: 2
+          }
+        },
+        reportDecisionDate: new Date()
+      }
+    });
+
+    return;
+
   }
 }

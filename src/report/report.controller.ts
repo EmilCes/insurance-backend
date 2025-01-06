@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Put,
   Query,
   Request,
   UnprocessableEntityException,
@@ -20,14 +21,22 @@ import { CreateReportDto } from "./dto/create-report.dto";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { UsersService } from "../users/users.service";
 
-import { RoleAdjuster, RoleDriver } from "src/roleAuth.decorator";
+import {
+  RoleAdjuster,
+  RoleDriver,
+  RoleSupportExecutive,
+} from "src/roleAuth.decorator";
 import { ReportFilterDto } from "./dto/filter.dto";
+import { EmployeeService } from "src/employee/employee.service";
+import { AssignReportDto } from "./dto/assign-report.dto";
+import { UpdateReportDictumDto } from "./dto/update-dictum.dto";
 
 @Controller("reports")
 export class ReportController {
   constructor(
     private readonly reportService: ReportService,
     private readonly usersService: UsersService,
+    private readonly employeeService: EmployeeService,
   ) {}
 
   @Post()
@@ -66,14 +75,20 @@ export class ReportController {
   async getReports(@Request() req, @Query() query: ReportFilterDto) {
     const { page = 0, status, reportNumber, startYear, endYear } = query;
 
-    if 
+    let idUser = 0;
+    let idEmployee = 0;
+    const role = req.user.role;
 
-    const idUser = await this.usersService.getIdUserFromEmail(
-      req.user.username,
-    );
+    if (role === "Conductor") {
+      idUser = await this.usersService.getIdUserFromEmail(req.user.username);
+    } else if (role === "Ajustador") {
+      idEmployee = await this.employeeService.getIdEmployeeFromEmail(
+        req.user.username,
+      );
+    }
 
-    if (idUser <= 0) {
-      console.log(0)
+    if (idUser <= 0 && idEmployee <= 0) {
+      console.log(0);
       throw new BadRequestException("Error with the request data");
     }
 
@@ -81,8 +96,23 @@ export class ReportController {
       const pageSize = 3;
 
       if (reportNumber !== undefined) {
-        const report = await this.reportService.findReportByReportNumber(
-          reportNumber,
+        const filters: any = { reportNumber };
+
+        if (role === "Conductor") {
+          filters.driverId = idUser;
+        } else if (role === "Ajustador") {
+          filters.Employee = {
+            some: {
+              idEmployee: idEmployee,
+            },
+          };
+        }
+
+        filters.reportNumber = reportNumber;
+
+        const report = await this.reportService.findReportByFilters(
+          //reportNumber,
+          filters,
         );
 
         if (!report) {
@@ -133,11 +163,15 @@ export class ReportController {
         filters.date = { gte: startDate, lte: endDate };
       }
 
-      /*if (this.usersService.role === 'driver') {
+      if (role === "Conductor") {
         filters.driverId = idUser;
-      } else if (this.usersService.role === 'employee') {
-        filters.employeeId = this.usersService.getIdUserFromEmail;
-      }*/
+      } else if (role === "Ajustador") {
+        filters.AssignedEmployee = {
+          is: {
+            idEmployee: idEmployee,
+          },
+        };
+      }
 
       const skip = page * pageSize;
 
@@ -178,23 +212,49 @@ export class ReportController {
   }
 
   @Get("detail/:reportNumber")
-  @RoleDriver()
   @RoleAdjuster()
+  @RoleDriver()
   async getReportDetail(
     @Request() req,
     @Param("reportNumber") reportNumber: string,
   ) {
     try {
-      const idUser = await this.usersService.getIdUserFromEmail(
-        req.user.username,
-      );
+      const role = req.user.role;
+      const username = req.user.username;
+      let idUser = 0;
+      let idEmployee = 0;
 
-      if (idUser <= 0) {
+      console.log(role);
+
+      if (role === "Conductor") {
+        idUser = await this.usersService.getIdUserFromEmail(username);
+      } else if (role === "Ajustador") {
+        idEmployee = await this.employeeService.getIdEmployeeFromEmail(
+          username,
+        );
+      }
+
+      if (idUser <= 0 && idEmployee <= 0) {
+        console.log(0);
         throw new BadRequestException("Error with the request data");
       }
 
+      const filters: any = {};
+
+      if (role === "Conductor") {
+        filters.driverId = idUser;
+      } else if (role === "Ajustador") {
+        filters.AssignedEmployee = {
+          is: {
+            idEmployee: idEmployee,
+          },
+        };
+      }
+
+      filters.reportNumber = reportNumber;
+
       const report = await this.reportService.findDetailedReportByReportNumber(
-        reportNumber,
+        filters,
       );
 
       if (!report) {
@@ -217,6 +277,63 @@ export class ReportController {
         throw error;
       }
       throw new InternalServerErrorException("Error al obtener el reporte");
+    }
+  }
+
+  @Put(":reportNumber/assign")
+  @RoleSupportExecutive()
+  async assignReport(
+    @Param("reportNumber") reportNumber: string,
+    @Body() assignReportDto: AssignReportDto,
+  ) {
+    return this.reportService.assignReport(reportNumber, assignReportDto);
+  }
+
+  @Put(":reportNumber/dictum")
+  @RoleAdjuster()
+  async updateDictum(
+    @Request() req,
+    @Param("reportNumber") reportNumber: string,
+    @Body(ValidationPipe) updateReportDictumDto: UpdateReportDictumDto,
+  ) {
+    try {
+      const role = req.user.role;
+      const username = req.user.username;
+
+      if (role !== "Ajustador") {
+        throw new ForbiddenException(
+          "Solo los austadores pueden actualizar el dictamen.",
+        );
+      }
+
+      const idEmployee = await this.employeeService.getIdEmployeeFromEmail(
+        username,
+      );
+
+      if (!idEmployee || idEmployee <= 0) {
+        throw new BadRequestException("Error con los datos del usuario");
+      }
+
+      await this.reportService.updateReportDictum(
+        reportNumber,
+        updateReportDictumDto,
+        idEmployee,
+      );
+
+      return { message: "Dictamen actualizado correctamente" };
+    } catch (error) {
+      console.error(error);
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        "Error al actualizar el dictamen",
+      );
     }
   }
 
@@ -243,6 +360,7 @@ export class ReportController {
       description: report.description,
       date: report.date,
       decisionDate: report.reportDecisionDate,
+      dictumResult: report.result,
       latitude: report.latitude,
       longitude: report.longitude,
       status: report.Status.statusType,

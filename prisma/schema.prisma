@@ -162,26 +162,27 @@ model Report {
   date               DateTime
   latitude           Decimal           @db.Decimal(9, 6)
   longitude          Decimal           @db.Decimal(10, 6)
-  result             String?            @db.Text
+  result             String?           @db.Text
   reportDecisionDate DateTime?
   idStatus           Int
   plates             String            @db.VarChar(15)
   driverId           Int
+  assignedEmployeeId Int?
   Driver             Driver            @relation(fields: [driverId], references: [idUser])     
   Vehicle            Vehicle           @relation(fields: [plates], references: [plates])
   ImplicateParties   ImplicateParty[]
   Photographs        Photograph[]
   Status             Status            @relation(fields: [idStatus], references: [idStatus])
-  Employee           Employee[]
+  AssignedEmployee   Employee?         @relation("EmployeeReports", fields: [assignedEmployeeId], references: [idEmployee])
 }
 
 model Employee {
-  idEmployee     Int          @id @default(autoincrement())
-  employeeNumber Int
-  idEmployeeType Int
-  EmployeeType   EmployeeType @relation(fields: [idEmployeeType], references: [idEmployeeType])
-  Account        Account      @relation(fields: [idEmployee], references: [idAccount])
-  Reports        Report[]
+  idEmployee         Int          @id @default(autoincrement())
+  employeeNumber     Int
+  idEmployeeType     Int
+  EmployeeType       EmployeeType @relation(fields: [idEmployeeType], references: [idEmployeeType])
+  Account            Account      @relation(fields: [idEmployee], references: [idAccount])
+  assignedReports    Report[]     @relation("EmployeeReports")
 }
 
 model EmployeeType {

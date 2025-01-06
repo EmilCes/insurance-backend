@@ -176,16 +176,17 @@ export class PoliciesController {
   async findAllActivePolicies(@Request() req) {
     try {
       const idUser = await this.usersService.getIdUserFromEmail(
-        req.user.username
+        req.user.username,
       );
 
       if (idUser <= 0) {
         throw new BadRequestException("Error with the request data");
       }
 
-      const activePolicies = await this.policiesService.findAllActivePoliciesByUser(
-        idUser
-      );
+      const activePolicies = await this.policiesService
+        .findAllActivePoliciesByUser(
+          idUser,
+        );
 
       if (activePolicies.length === 0) {
         throw new NotFoundException("No active policies found for the user");
@@ -301,5 +302,5 @@ export class PoliciesController {
       }
       throw new UnprocessableEntityException("Error finding one policy");
     }
-  }  
+  }
 }

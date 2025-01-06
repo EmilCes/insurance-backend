@@ -7,10 +7,12 @@ import { JwtAuthGuard } from './jwt.auth.guard';
 import { PrismaService } from 'src/prisma.service';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigService, ConfigModule } from '@nestjs/config';
+import { EmployeeModule } from 'src/employee/employee.module';
 
 @Module({
   imports: [
     UsersModule,
+    EmployeeModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
