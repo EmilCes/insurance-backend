@@ -5,7 +5,8 @@ export const employeeType = [
 ]
 
 export const employee = [
-    { idEmployee: 1, employeeNumber: 1, idEmployeeType: 1 }
+    { idEmployee: 1, employeeNumber: 1, idEmployeeType: 1 },
+    { idEmployee: 2, employeeNumber: 2, idEmployeeType: 3 }
 ]
 
 export const state = [
@@ -41,6 +42,10 @@ export const account = [
     {
         name: "Admin", lastName: "Admin", datebirth: new Date("2001-12-12"), email: "admin@gmail.com", password: "12345678", registrationDate: new Date("2014-12-12"),
         postalCode: "91020", address: "Calle 78237", idAccount: 3, idMunicipality: 1, idEmployee: 1
+    },
+    {
+        name: "César", lastName: "Lezama", datebirth: new Date("2003-12-12"), email: "e@a.com", password: "12345678", registrationDate: new Date("2012-12-12"),
+        postalCode: "91020", address: "Calle 4321", idAccount: 4, idMunicipality: 1, idEmployee: 2
     }
 ]
 

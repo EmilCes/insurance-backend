@@ -2,13 +2,11 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Delete,
+  ForbiddenException,
   Get,
-  HttpException,
+  InternalServerErrorException,
   NotFoundException,
   Param,
-  ParseIntPipe,
-  Patch,
   Post,
   Query,
   Request,
@@ -19,15 +17,11 @@ import {
 } from "@nestjs/common";
 import { ReportService } from "./report.service";
 import { CreateReportDto } from "./dto/create-report.dto";
-import { UpdateReportDto } from "./dto/update-report.dto";
-import { Public } from "../skipAuth.decorator";
 import { FilesInterceptor } from "@nestjs/platform-express";
-import { ValidationService } from "./validation.service";
 import { UsersService } from "../users/users.service";
 
-import { AwsConfigService } from "src/AWS/aws-config.service";
-import { RoleDriver } from "src/roleAuth.decorator";
-import { FormDataRequest } from "nestjs-form-data";
+import { RoleAdjuster, RoleDriver } from "src/roleAuth.decorator";
+import { ReportFilterDto } from "./dto/filter.dto";
 
 @Controller("reports")
 export class ReportController {
@@ -37,7 +31,6 @@ export class ReportController {
   ) {}
 
   @Post()
-  //@FormDataRequest()
   @RoleDriver()
   @UseInterceptors(FilesInterceptor("images", 8))
   async create(
@@ -45,8 +38,6 @@ export class ReportController {
     @UploadedFiles() files: Array<Express.MulterS3.File>,
     @Body(ValidationPipe) createReportDto: CreateReportDto,
   ) {
-    console.log("Archivos subidos:", files);
-
     try {
       const idUser = await this.usersService.getIdUserFromEmail(
         req.user.username,
@@ -56,84 +47,243 @@ export class ReportController {
         throw new BadRequestException("Error with the request data");
       }
 
-      const report = await this.reportService.create(
+      const reportNumber = await this.reportService.create(
         createReportDto,
         files,
         idUser,
       );
 
-      return report;
-
+      return { reportNumber: reportNumber };
     } catch (error) {
       console.log(error);
       throw new UnprocessableEntityException("Error creating report");
     }
   }
 
-  @Patch(":id")
-  update(@Param("id") id: string, @Body() updateReportDto: UpdateReportDto) {
-    return this.reportService.update(+id, updateReportDto);
-  }
-
-  @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.reportService.remove(+id);
-  }
-
   @Get()
-  @Public()
-  async findFilter(
+  @RoleDriver()
+  @RoleAdjuster()
+  async getReports(@Request() req, @Query() query: ReportFilterDto) {
+    const { page = 0, status, reportNumber, startYear, endYear } = query;
+
+    if 
+
+    const idUser = await this.usersService.getIdUserFromEmail(
+      req.user.username,
+    );
+
+    if (idUser <= 0) {
+      console.log(0)
+      throw new BadRequestException("Error with the request data");
+    }
+
+    try {
+      const pageSize = 3;
+
+      if (reportNumber !== undefined) {
+        const report = await this.reportService.findReportByReportNumber(
+          reportNumber,
+        );
+
+        if (!report) {
+          throw new NotFoundException(
+            `No se encontro el reporte con numero de folio ${reportNumber}`,
+          );
+        }
+
+        const formattedReport = this.formatReport(report);
+
+        /*if (!this.reportService.hasAccessToReport(idUser, report)) {
+          throw new ForbiddenException('No tienes acceso a este reporte');
+        }*/
+
+        return {
+          data: [formattedReport],
+          pageInfo: {
+            totalItems: 1,
+            totalPages: 1,
+            currentPage: 0,
+            itemsPerPage: pageSize,
+          },
+        };
+      }
+
+      const filters: any = {};
+
+      if (status && status !== 0) {
+        filters.idStatus = status;
+      }
+
+      if ((startYear && !endYear) || (!startYear && endYear)) {
+        throw new BadRequestException(
+          "Debes proporcionar el año de inicio y fin",
+        );
+      }
+
+      if (startYear && endYear) {
+        if (startYear > endYear) {
+          throw new BadRequestException(
+            "El año de inicio no puede ser mayor al año de fin",
+          );
+        }
+
+        const startDate = new Date(`${startYear}-01-01T00:00:00.000Z`);
+        const endDate = new Date(`${endYear}-12-31T23:59:59.999Z`);
+
+        filters.date = { gte: startDate, lte: endDate };
+      }
+
+      /*if (this.usersService.role === 'driver') {
+        filters.driverId = idUser;
+      } else if (this.usersService.role === 'employee') {
+        filters.employeeId = this.usersService.getIdUserFromEmail;
+      }*/
+
+      const skip = page * pageSize;
+
+      const totalCount = await this.reportService.countReports(filters);
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      const reports = await this.reportService.findReports(
+        filters,
+        skip,
+        pageSize,
+      );
+
+      const formattedReports = reports.map((report) =>
+        this.formatReport(report)
+      );
+
+      return {
+        data: formattedReports,
+        pageInfo: {
+          totalItems: totalCount,
+          totalPages: totalPages,
+          currentPage: page,
+          itemsPerPage: pageSize,
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException("Error al obtener reportes");
+    }
+  }
+
+  @Get("detail/:reportNumber")
+  @RoleDriver()
+  @RoleAdjuster()
+  async getReportDetail(
     @Request() req,
-    @Query("page", ParseIntPipe) query: number,
-    @Query("status", ParseIntPipe) status: number,
-    @Query("idReport") idReport?: number,
-    @Query("firstdate") firstdate?: string,
-    @Query("enddate") enddate?: string,
+    @Param("reportNumber") reportNumber: string,
   ) {
     try {
-      if (query < 0) {
-        throw new BadRequestException("Invalid page");
+      const idUser = await this.usersService.getIdUserFromEmail(
+        req.user.username,
+      );
+
+      if (idUser <= 0) {
+        throw new BadRequestException("Error with the request data");
       }
-      let firstdatetime;
-      let enddatetime;
-      let firstparsedDate: Date | undefined;
-      let endparsedDate: Date | undefined;
-      if (firstdate && enddate) {
-        firstdatetime = new Date(firstdate).toISOString();
-        enddatetime = new Date(enddate).toISOString();
-        firstparsedDate = new Date(firstdatetime);
-        endparsedDate = new Date(enddatetime);
-        if (
-          isNaN(firstparsedDate.getTime()) || isNaN(endparsedDate.getTime())
-        ) {
-          throw new BadRequestException("Invalid date.");
-        }
+
+      const report = await this.reportService.findDetailedReportByReportNumber(
+        reportNumber,
+      );
+
+      if (!report) {
+        throw new NotFoundException(
+          `No se encontró el reporte con número de folio ${reportNumber}`,
+        );
       }
-      switch (status) {
-        case 0:
-        case 1:
-        case 2:
-          const reports = await this.reportService.findReportPage(
-            query,
-            status,
-            idReport,
-            firstdatetime,
-            enddatetime,
-          );
-          if (reports.length > 0) {
-            return reports;
-          }
-          break;
-        default:
-          throw new BadRequestException("Invalid status");
+
+      const formattedReport = this.formatDetailedReport(report);
+
+      return {
+        data: formattedReport,
+      };
+    } catch (error) {
+      console.log(error);
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
       }
-      throw new NotFoundException("Report not found");
-    } catch (err) {
-      console.log(err);
-      if (err instanceof HttpException) {
-        throw err;
-      }
-      throw new UnprocessableEntityException("Error getting the reports");
+      throw new InternalServerErrorException("Error al obtener el reporte");
     }
+  }
+
+  private formatReport(report: any) {
+    return {
+      reportNumber: report.reportNumber,
+      creationDate: report.date,
+      decisionDate: report.reportDecisionDate,
+      status: report.Status.statusType,
+      vehicle: {
+        plates: report.Vehicle.plates,
+        modelYear: report.Vehicle.Model.year,
+        brand: report.Vehicle.Model.Brand.name,
+      },
+      policyPlan: report.Vehicle.Policy && report.Vehicle.Policy[0]
+        ? report.Vehicle.Policy[0].PolicyPlan.title
+        : null,
+    };
+  }
+
+  private formatDetailedReport(report: any) {
+    return {
+      reportNumber: report.reportNumber,
+      description: report.description,
+      date: report.date,
+      decisionDate: report.reportDecisionDate,
+      latitude: report.latitude,
+      longitude: report.longitude,
+      status: report.Status.statusType,
+      photographs: report.Photographs.map((photo) => ({
+        name: photo.name,
+        url: photo.url,
+      })),
+      implicateParties: report.ImplicateParties.map((party) => ({
+        name: party.name,
+        plates: party.plates,
+        brand: party.Brand ? party.Brand.name : null,
+        color: party.Color ? party.Color.vehicleColor : null,
+      })),
+      driver: report.Driver
+        ? {
+          phone: report.Driver.phone,
+          licenseNumber: report.Driver.licenseNumber,
+          name: report.Driver.Account.name,
+          email: report.Driver.Account.email,
+        }
+        : null,
+      vehicle: {
+        plates: report.Vehicle.plates,
+        serialNumberVehicle: report.Vehicle.serialNumberVehicle,
+        occupants: report.Vehicle.occupants,
+        color: report.Vehicle.Color.vehicleColor,
+        modelYear: report.Vehicle.Model.year,
+        brand: report.Vehicle.Model.Brand.name,
+        type: report.Vehicle.Type.vehicleType,
+        serviceVehicle: report.Vehicle.ServiceVehicle.name,
+      },
+      policy: report.Vehicle.Policy.length > 0
+        ? {
+          serialNumber: report.Vehicle.Policy[0].serialNumber,
+          startDate: report.Vehicle.Policy[0].startDate,
+          policyPlan: {
+            title: report.Vehicle.Policy[0].PolicyPlan.title,
+            description: report.Vehicle.Policy[0].PolicyPlan.description,
+          },
+        }
+        : null,
+    };
   }
 }

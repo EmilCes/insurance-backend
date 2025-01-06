@@ -157,6 +157,7 @@ model State {
 
 model Report {
   idReport           Int               @id @default(autoincrement())
+  reportNumber       String            @unique @db.VarChar(6)
   description        String            @db.Text
   date               DateTime
   latitude           Decimal           @db.Decimal(9, 6)
@@ -165,11 +166,12 @@ model Report {
   reportDecisionDate DateTime?
   idStatus           Int
   plates             String            @db.VarChar(15)
+  driverId           Int
+  Driver             Driver            @relation(fields: [driverId], references: [idUser])     
   Vehicle            Vehicle           @relation(fields: [plates], references: [plates])
   ImplicateParties   ImplicateParty[]
   Photographs        Photograph[]
   Status             Status            @relation(fields: [idStatus], references: [idStatus])
-  Driver             Driver[]
   Employee           Employee[]
 }
 

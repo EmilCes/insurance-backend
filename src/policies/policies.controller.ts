@@ -73,6 +73,7 @@ export class PoliciesController {
       }
       throw new BadRequestException("Error with the request data");
     } catch (err) {
+      console.log(err);
       if (err instanceof HttpException) {
         throw err;
       }

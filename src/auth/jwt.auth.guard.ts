@@ -62,6 +62,7 @@ export class JwtAuthGuard implements CanActivate {
             context.getHandler(),
             context.getClass(),
         ]);
+        
         if (needsRoleDriver && userRole == "Conductor") {
             return true;
         }
@@ -70,6 +71,7 @@ export class JwtAuthGuard implements CanActivate {
             context.getHandler(),
             context.getClass(),
         ]);
+
         if (needsRoleAdjuster && userRole == "Ajustador") {
             return true;
         }
@@ -78,6 +80,7 @@ export class JwtAuthGuard implements CanActivate {
             context.getHandler(),
             context.getClass(),
         ]);
+
         if (needsRoleSupportExecutive && userRole == "Ejecutivo de asistencia") {
             return true;
         }
@@ -86,6 +89,7 @@ export class JwtAuthGuard implements CanActivate {
             context.getHandler(),
             context.getClass(),
         ]);
+
         if (needsRoleAdmin && userRole == "Administrador") {
             return true;
         }

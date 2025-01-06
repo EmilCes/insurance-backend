@@ -5,6 +5,9 @@ const prisma = new PrismaClient();
 
 async function main() {
 
+    await prisma.photograph.deleteMany({});
+    await prisma.implicateParty.deleteMany({});
+    await prisma.report.deleteMany({});
     await prisma.policyService.deleteMany({});
     await prisma.policy.deleteMany({});
     await prisma.vehicle.deleteMany({});
