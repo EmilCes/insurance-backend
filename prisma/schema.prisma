@@ -138,6 +138,7 @@ model Account {
   Municipality     Municipality @relation(fields: [idMunicipality], references: [idMunicipality])
   Driver           Driver?      @relation(fields: [idUser], references: [idUser])
   Employee         Employee?
+  secretKey        String       @db.VarChar(100) @default("default_secret_key")
 }
 
 model Municipality {

@@ -1,7 +1,9 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service';
+import { equals } from 'class-validator';
 
 @Injectable()
 export class UsersService {
@@ -10,9 +12,55 @@ export class UsersService {
     private prisma: PrismaService
   ) { }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  // src/users/users.service.ts
+
+async create(createUserDto: CreateUserDto) {
+  // Verificar si ya existe un usuario con el mismo correo electrónico o RFC
+  const existingEmail = await this.prisma.account.findFirst({
+    where: { email: createUserDto.email },
+  });
+
+  const existingRfc = await this.prisma.driver.findFirst({
+    where: { rfc: createUserDto.rfc },
+  });
+
+  if (existingEmail) {
+    throw new Error(`El correo electrónico ${createUserDto.email} ya está registrado.`);
   }
+
+  if (existingRfc) {
+    throw new Error(`El RFC ${createUserDto.rfc} ya está registrado.`);
+  }
+
+  const user = await this.prisma.account.create({
+    data: {
+      name: createUserDto.name,
+      lastName: createUserDto.lastName,
+      datebirth: new Date(createUserDto.datebirth),
+      email: createUserDto.email,
+      password: createUserDto.password,
+      postalCode: createUserDto.postalCode,
+      address: createUserDto.address,
+      registrationDate: new Date(),
+      secretKey: createUserDto.secretKey || 'default_secret_key',
+      Municipality: {  
+        connect: { idMunicipality: +createUserDto.idMunicipality }, 
+      },
+      Driver: {
+        create: {
+          rfc: createUserDto.rfc,
+          bankAccountNumber: createUserDto.bankAccountNumber,
+          expirationDateBankAccount: new Date(`${createUserDto.expirationDateBankAccount}-01T00:00:00.000Z`),
+          licenseNumber: createUserDto.licenseNumber,
+          phone: createUserDto.phone,
+        },
+      },
+    },
+  });
+
+  return user; 
+}
+
 
   findAll() {
     return `This action returns all users`;
@@ -48,6 +96,22 @@ export class UsersService {
       return 0;
     }
     const user = await this.prisma.account.findFirst({ where: { email: { equals: email } }, select: { idUser: true } });
+    return user?.idUser == undefined ? 0 : user.idUser;
+  }
+
+  async getIdUserFromLicenseNumber(licenseNumber: string) {
+    if (licenseNumber == undefined) {
+      return 0;
+    }
+    const user = await this.prisma.driver.findFirst({where: {licenseNumber: {equals: licenseNumber}}, select: { idUser: true}});
+    return user?.idUser == undefined ? 0 : user.idUser;
+  }
+
+  async getIdUserFromRFC(rfc: string) {
+    if (rfc == undefined) {
+      return 0;
+    }
+    const user = await this.prisma.driver.findFirst({where: {rfc: {equals: rfc}}, select: { idUser: true}});
     return user?.idUser == undefined ? 0 : user.idUser;
   }
 
