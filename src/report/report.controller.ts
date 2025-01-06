@@ -72,6 +72,7 @@ export class ReportController {
   @Get()
   @RoleDriver()
   @RoleAdjuster()
+  @RoleSupportExecutive()
   async getReports(@Request() req, @Query() query: ReportFilterDto) {
     const { page = 0, status, reportNumber, startYear, endYear } = query;
 
@@ -81,9 +82,9 @@ export class ReportController {
 
     if (role === "Conductor") {
       idUser = await this.usersService.getIdUserFromEmail(req.user.username);
-    } else if (role === "Ajustador") {
+    } else if (role === "Ajustador" || role === "Ejecutivo de asistencia") {
       idEmployee = await this.employeeService.getIdEmployeeFromEmail(
-        req.user.username,
+        req.user.username
       );
     }
 
@@ -100,7 +101,7 @@ export class ReportController {
 
         if (role === "Conductor") {
           filters.driverId = idUser;
-        } else if (role === "Ajustador") {
+        } else if (role === "Ajustador" || role === "Ejecutivo de asistencia") {
           filters.Employee = {
             some: {
               idEmployee: idEmployee,
@@ -111,7 +112,6 @@ export class ReportController {
         filters.reportNumber = reportNumber;
 
         const report = await this.reportService.findReportByFilters(
-          //reportNumber,
           filters,
         );
 
@@ -122,10 +122,6 @@ export class ReportController {
         }
 
         const formattedReport = this.formatReport(report);
-
-        /*if (!this.reportService.hasAccessToReport(idUser, report)) {
-          throw new ForbiddenException('No tienes acceso a este reporte');
-        }*/
 
         return {
           data: [formattedReport],
