@@ -15,11 +15,6 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
-
   @RoleDriver()
   @Get('/account')
   async findAccountInfo(@Request() req) {
@@ -139,8 +134,4 @@ export class UsersController {
     return this.usersService.updateUserByEmail(req.user.username, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
 }

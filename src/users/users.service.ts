@@ -98,11 +98,6 @@ export class UsersService {
     return user;
   }
 
-
-  findAll() {
-    return `This action returns all users`;
-  }
-
   findOne(userId: number) {
     const userFound = this.prisma.account.findUnique({ where: { idAccount: userId } });
 
@@ -181,14 +176,6 @@ export class UsersService {
       throw new NotFoundException(`Empleado no encontrado`);
 
     return employeeType.EmployeeType.employeeType;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 
   async setTwoFactorAuthenticationSecret(secret: string, email: string) {

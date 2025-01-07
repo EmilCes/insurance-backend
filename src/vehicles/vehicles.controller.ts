@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, ConflictException, HttpException, UnprocessableEntityException, UnauthorizedException, BadRequestException, Request } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, ConflictException, HttpException, UnprocessableEntityException, BadRequestException, Request } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { RoleDriver } from '../roleAuth.decorator';
 import { UsersService } from '../users/users.service';
