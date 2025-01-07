@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { state, municipality, drivers, account, colors, type, serviceVehicle, policyPlanStatus, policyPlans, policyPlansServices, brands, models, employeeType, employee, vehicle, policies, policyServices, status } from "./modelsSeed";
+import { state, municipality, drivers, account, colors, type, serviceVehicle, policyPlanStatus, policyPlans, policyPlansServices, brands, models, employeeType, employee, vehicle, policies, policyServices, status, reports, photographs } from "./modelsSeed";
 
 const prisma = new PrismaClient();
 
@@ -134,6 +134,14 @@ async function main() {
             data: item,
         });
     }
+    // Crear reportes
+for (let item of reports) {
+    await prisma.report.create({
+      data: item,
+    });
+  }
+  
+  // Crear fotografías (opcional
 }
 
 main()

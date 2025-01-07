@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, ConflictException } from "@nestjs/common";
 import { CreateEmployeeDto } from "./dto/create-employee.dto";
 import { UpdateEmployeeDto } from "./dto/update-employee.dto";
 import { PrismaService } from "src/prisma.service";
@@ -11,89 +11,150 @@ export class EmployeeService {
   ) {}
 
   async create(createEmployeeDto: CreateEmployeeDto) {
+    // Verificar si ya existe un empleado con el mismo correo electrónico
+    const existingEmail = await this.prisma.account.findFirst({
+      where: { email: createEmployeeDto.email }, // Esto funcionará si `email` es único en el esquema
+    });
+  
+    if (existingEmail) {
+      throw new ConflictException(`El correo electrónico ${createEmployeeDto.email} ya está registrado.`);
+    }
+  
+    // Validar si el tipo de empleado existe
+    const employeeType = await this.prisma.employeeType.findUnique({
+      where: { idEmployeeType: createEmployeeDto.idEmployeeType },
+    });
+  
+    if (!employeeType) {
+      throw new NotFoundException(`El tipo de empleado con ID ${createEmployeeDto.idEmployeeType} no existe.`);
+    }
+  
     // Validar que el municipio exista
     const municipality = await this.prisma.municipality.findUnique({
       where: { idMunicipality: createEmployeeDto.idMunicipality },
-      include: { State: true }, // Incluir el estado relacionado
     });
-
+  
     if (!municipality) {
-      throw new NotFoundException(
-        `Municipio con ID ${createEmployeeDto.idMunicipality} no encontrado`
-      );
+      throw new NotFoundException(`El municipio con ID ${createEmployeeDto.idMunicipality} no existe.`);
     }
-
-    // Encriptar la contraseña
-    const hashedPassword = await bcrypt.hash(createEmployeeDto.password, 10);
-
-    // Crear la cuenta
+  
+    // Crear la cuenta asociada al empleado (sin `idEmployee` por ahora)
     const account = await this.prisma.account.create({
       data: {
         name: createEmployeeDto.name,
         lastName: createEmployeeDto.lastName,
-        datebirth: createEmployeeDto.dateOfBirth,
+        datebirth: new Date(createEmployeeDto.dateOfBirth),
         email: createEmployeeDto.email,
-        password: hashedPassword,
+        password: createEmployeeDto.password,
         postalCode: createEmployeeDto.postalCode,
         address: createEmployeeDto.address,
         registrationDate: new Date(),
-        Municipality: { connect: { idMunicipality: createEmployeeDto.idMunicipality } }, // Relación correcta
+        Municipality: {
+          connect: { idMunicipality: createEmployeeDto.idMunicipality }, // Relación con el municipio
+        },
       },
     });
-    // Crear el empleado
+  
+    // Crear el empleado con la relación a la cuenta
     const employee = await this.prisma.employee.create({
       data: {
         employeeNumber: createEmployeeDto.employeeNumber,
-        EmployeeType: { connect: { idEmployeeType: createEmployeeDto.idEmployeeType } }, // Relación directa
-        Account: { connect: { idAccount: account.idAccount } }, // Relación directa
+        EmployeeType: {
+          connect: { idEmployeeType: createEmployeeDto.idEmployeeType }, // Relación con tipo de empleado
+        },
+        Account: {
+          connect: { idAccount: account.idAccount }, // Relación con cuenta creada
+        },
       },
     });
-     
-
+  
+    // Actualizar la cuenta con el `idEmployee` del empleado recién creado
+    await this.prisma.account.update({
+      where: { idAccount: account.idAccount },
+      data: { idEmployee: employee.idEmployee },
+    });
+  
     return {
+      message: 'Empleado creado con éxito',
       employee,
       account,
-      municipality: {
-        id: municipality.idMunicipality,
-        name: municipality.municipalityName,
-        state: municipality.State,
-      },
     };
   }
+  
 
   findAll() {
-    return `This action returns all employee`;
+    return this.prisma.employee.findMany({
+      include: {
+        Account: true,
+        EmployeeType: true,
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} employee`;
+  async findOne(idEmployee: number) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { idEmployee },
+      include: {
+        Account: true,
+        EmployeeType: true,
+      },
+    });
+
+    if (!employee) {
+      throw new NotFoundException(`Empleado con ID ${idEmployee} no encontrado`);
+    }
+
+    return employee;
   }
 
-  update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
-    return `This action updates a #${id} employee`;
+  async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { idEmployee: id },
+    });
+
+    if (!employee) {
+      throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
+    }
+
+    return this.prisma.employee.update({
+      where: { idEmployee: id },
+      data: {
+        ...updateEmployeeDto,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} employee`;
+  async remove(id: number) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { idEmployee: id },
+    });
+
+    if (!employee) {
+      throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
+    }
+
+    return this.prisma.employee.delete({
+      where: { idEmployee: id },
+    });
   }
 
   async getIdEmployeeFromEmail(email: string) {
-    if (email == undefined) {
+    if (!email) {
       return 0;
     }
     
     const employee = await this.prisma.account.findFirst({
-      where: { email: { equals: email } },
+      where: { email },
       select: { idEmployee: true },
     });
 
-    return employee?.idEmployee == undefined ? 0 : employee.idEmployee;
+    return employee?.idEmployee ?? 0;
   }
 
   async getTypeEmployee(idEmployee: number) {
     const employeeType = await this.prisma.employee.findUnique({
       select: { EmployeeType: { select: { employeeType: true } } },
-      where: { idEmployee: idEmployee },
+      where: { idEmployee },
     });
 
     if (!employeeType) {
