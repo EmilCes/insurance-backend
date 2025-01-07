@@ -68,6 +68,8 @@ export class ReportController {
     }
   }
 
+  
+
   @Get()
   @RoleDriver()
   @RoleAdjuster()
@@ -88,13 +90,13 @@ export class ReportController {
     }
 
     if (idUser <= 0 && idEmployee <= 0) {
-      console.log(0);
       throw new BadRequestException("Error with the request data");
     }
 
     try {
       const pageSize = 3;
 
+      // Filtrar por número de reporte específico
       if (reportNumber !== undefined) {
         const filters: any = { reportNumber };
 
@@ -108,11 +110,7 @@ export class ReportController {
           };
         }
 
-        filters.reportNumber = reportNumber;
-
-        const report = await this.reportService.findReportByFilters(
-          filters,
-        );
+        const report = await this.reportService.findReportByFilters(filters);
 
 
         if (!report) {
@@ -142,10 +140,12 @@ export class ReportController {
 
       const filters: any = {};
 
+      // Filtrar por estado (status)
       if (status && status !== 0) {
         filters.idStatus = status;
       }
 
+      // Filtrar por rango de fechas
       if ((startYear && !endYear) || (!startYear && endYear)) {
         throw new BadRequestException(
           "Debes proporcionar el año de inicio y fin",
@@ -165,12 +165,35 @@ export class ReportController {
         filters.date = { gte: startDate, lte: endDate };
       }
 
+      // Lógica para cada rol
       if (role === "Conductor") {
         filters.driverId = idUser;
       } else if (role === "Ajustador") {
-        filters.AssignedEmployee = {
-          is: {
-            idEmployee: idEmployee,
+        // Ajustador: reportes asignados a sí mismo o no asignados
+        filters.OR = [
+          { AssignedEmployee: { is: { idEmployee: idEmployee } } },
+          { AssignedEmployee: null }, // Reportes no asignados
+        ];
+      } else if (role === "Ejecutivo de asistencia") {
+        // Ejecutivo de asistencia: solo reportes no asignados y campos específicos
+        filters.AssignedEmployee = null;
+
+        const reports = await this.reportService.findReportsForSupportExecutive(
+          filters,
+          page * pageSize,
+          pageSize,
+        );
+
+        const totalCount = await this.reportService.countReports(filters);
+        const totalPages = Math.ceil(totalCount / pageSize);
+
+        return {
+          data: reports,
+          pageInfo: {
+            totalItems: totalCount,
+            totalPages: totalPages,
+            currentPage: page,
+            itemsPerPage: pageSize,
           },
         };
       }
@@ -180,11 +203,7 @@ export class ReportController {
       const totalCount = await this.reportService.countReports(filters);
       const totalPages = Math.ceil(totalCount / pageSize);
 
-      const reports = await this.reportService.findReports(
-        filters,
-        skip,
-        pageSize,
-      );
+      const reports = await this.reportService.findReports(filters, skip, pageSize);
 
       if (!reports || reports.length === 0) {
         return {
@@ -199,7 +218,7 @@ export class ReportController {
       }
 
       const formattedReports = reports.map((report) =>
-        this.formatReport(report)
+        this.formatReport(report),
       );
 
       return {
@@ -300,6 +319,14 @@ export class ReportController {
   ) {
     return this.reportService.assignReport(reportNumber, assignReportDto);
   }
+
+  @Get('available-adjusters')
+  @RoleSupportExecutive() // Si aplica alguna validación de rol
+  async getAvailableAdjusters() {
+    return this.reportService.getAvailableAdjusters();
+  }
+  
+
 
   @Put(":reportNumber/dictum")
   @RoleAdjuster()
@@ -415,4 +442,6 @@ export class ReportController {
         : null,
     };
   }
+
+
 }

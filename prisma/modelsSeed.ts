@@ -149,3 +149,44 @@ export const policyServices = [
     {  idPolicyService: 1, name: "Daños materiales", isCovered: false, coveredCost: 3000, serialNumber: "0cafd594-2186-4f3a-851d-9ef334e3acaa"},
     {  idPolicyService: 2, name: "Robo total", isCovered: false, coveredCost: 4000, serialNumber: "0cafd594-2186-4f3a-851d-9ef334e3acaa"}
 ]
+
+export const reports = [
+    {
+      reportNumber: "REP001",
+      description: "Accidente menor en cruce",
+      date: new Date("2024-01-01T10:00:00"),
+      latitude: 19.432608,
+      longitude: -99.133209,
+      idStatus: 1, // Pendiente
+      plates: "AAA-01-01", // Relacionado con un vehículo existente
+      driverId: 1, // Relacionado con un conductor existente
+      assignedEmployeeId: null, // No asignado aún
+    },
+    {
+      reportNumber: "REP002",
+      description: "Colisión múltiple en avenida principal",
+      date: new Date("2024-01-02T11:30:00"),
+      latitude: 19.433700,
+      longitude: -99.134500,
+      idStatus: 1, // Pendiente
+      plates: "AAA-01-01", // Relacionado con el mismo vehículo
+      driverId: 1, // Relacionado con el mismo conductor
+      assignedEmployeeId: null, // No asignado aún
+    },
+  ];
+
+  export const photographs = [
+    {
+      name: "Foto 1",
+      url: "https://example.com/foto1.jpg",
+      idReport: "REP001", // Vinculado al `reportNumber` del primer reporte
+    },
+    {
+      name: "Foto 2",
+      url: "https://example.com/foto2.jpg",
+      idReport: "REP002", // Vinculado al `reportNumber` del segundo reporte
+    },
+  ];
+  
+  
+  

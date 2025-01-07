@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { CreateReportDto } from "./dto/create-report.dto";
 import { AssignReportDto } from "./dto/assign-report.dto";
 import { UpdateReportDictumDto } from "./dto/update-dictum.dto";
@@ -79,6 +79,37 @@ export class ReportService {
     return report.reportNumber;
   }
 
+  async findReportsForSupportExecutive(filters: any, skip: number, take: number) {
+    return this.prisma.report.findMany({
+      where: filters,
+      select: {
+        reportNumber: true,
+        description: true,
+        date: true,
+        latitude: true,
+        longitude: true,
+        Driver: {
+          select: {
+            phone: true,
+            Account: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        Vehicle: {
+          select: {
+            plates: true,
+          },
+        },
+      },
+      skip,
+      take,
+    });
+  }
+
+  
   async findReportByFilters(filters: any) {
     return this.prisma.report.findUnique({
       where: filters,
@@ -307,6 +338,41 @@ export class ReportService {
 
     return reportNumber;
   }
+  async getAvailableAdjusters() {
+    try {
+      // Recuperar empleados del tipo "Ajustador" que no tengan reportes pendientes
+      const availableAdjusters = await this.prisma.employee.findMany({
+        where: {
+          idEmployeeType: 3, // Solo ajustadores
+          assignedReports: {
+            none: {
+              idStatus: { not: 3 }, // Excluir ajustadores con reportes que no están en estado "resuelto"
+            },
+          },
+        },
+        include: {
+          Account: {
+            select: {
+              name: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      });
+  
+      // Formatear los datos
+      return availableAdjusters.map((adjuster) => ({
+        id: adjuster.idEmployee,
+        name: `${adjuster.Account?.name} ${adjuster.Account?.lastName}`,
+        email: adjuster.Account?.email,
+      }));
+    } catch (error) {
+      console.error("Error al obtener ajustadores disponibles:", error);
+      throw new InternalServerErrorException("Error al obtener ajustadores disponibles");
+    }
+  }
+  
 
   async assignReport(reportNumber: string, assignReportDto: AssignReportDto) {
     const { assignedEmployeeId } = assignReportDto;
