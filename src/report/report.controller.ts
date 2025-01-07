@@ -64,7 +64,6 @@ export class ReportController {
 
       return { reportNumber: reportNumber };
     } catch (error) {
-      console.log(error);
       throw new UnprocessableEntityException("Error creating report");
     }
   }
@@ -239,8 +238,6 @@ export class ReportController {
       let idUser = 0;
       let idEmployee = 0;
 
-      console.log(role);
-
       if (role === "Conductor") {
         idUser = await this.usersService.getIdUserFromEmail(username);
       } else if (role === "Ajustador") {
@@ -337,7 +334,6 @@ export class ReportController {
 
       return { message: "Dictamen actualizado correctamente" };
     } catch (error) {
-      console.error(error);
       if (
         error instanceof BadRequestException ||
         error instanceof NotFoundException ||
