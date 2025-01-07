@@ -81,6 +81,8 @@ export class AuthService {
     async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, email: string) {
         const user = await this.usersService.signIn(email);
 
+        console.log(twoFactorAuthenticationCode + user.secretKey)
+
         return authenticator.verify({
             token: twoFactorAuthenticationCode,
             secret: user.secretKey,

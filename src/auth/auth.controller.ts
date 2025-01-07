@@ -15,13 +15,14 @@ export class AuthController {
     @Public()
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    signIn(@Body() signInDto: Record<string, any>) {
+    async signIn(@Body() signInDto: Record<string, any>) {
         const isCodeValid =
             this.authService.isTwoFactorAuthenticationCodeValid(
                 signInDto.twoFactorAuthenticationCode,
                 signInDto.email,
             );
-        if (!isCodeValid) {
+
+        if (await isCodeValid === false) {
             throw new UnauthorizedException('Wrong authentication code');
         }
 
@@ -30,10 +31,10 @@ export class AuthController {
 
     @Public()
     @Post('2fa/enabled')
-    async is2faEnabled(@Req() req,@Body() body: Record<string, any>){
+    async is2faEnabled(@Req() req, @Body() body: Record<string, any>) {
         return this.usersService.is2faEnabled(body.email);
     }
-    
+
     @Public()
     @Post('2fa/generate')
     async generateTwoFactorAuthentication(@Body() generateDto: Record<string, any>) {
@@ -48,7 +49,7 @@ export class AuthController {
                 turnOnDto.twoFactorAuthenticationCode,
                 turnOnDto.email,
             );
-        if (!isCodeValid) {
+        if (await isCodeValid === false) {
             throw new UnauthorizedException('Wrong authentication code');
         }
 
