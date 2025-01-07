@@ -12,13 +12,21 @@ import { PolicyPlanModule } from './policy-plan/policy-plan.module';
 import { ReportModule } from './report/report.module';
 import { MunicipalityModule } from './municipality/municipality.module';
 import { StateModule } from './state/state.module';
+import { AwsConfigService } from './AWS/aws-config.service';
+import { AwsConfigModule } from './AWS/aws-config.module';
+import { NestjsFormDataModule } from 'nestjs-form-data';
+import { EmployeeModule } from './employee/employee.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
     envFilePath: '.env'
-  }), AuthModule, UsersModule, BrandsModule, VehiclesModule, PoliciesModule, PolicyPlanModule, ReportModule, MunicipalityModule, StateModule],
+  }), AuthModule, UsersModule, BrandsModule, VehiclesModule, 
+  PoliciesModule, PolicyPlanModule, ReportModule,  MunicipalityModule, StateModule, AwsConfigModule,
+  NestjsFormDataModule,
+  EmployeeModule
+],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AwsConfigService],
 })
 export class AppModule {}

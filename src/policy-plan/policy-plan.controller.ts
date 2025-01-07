@@ -3,15 +3,15 @@ import { PolicyPlanService } from './policy-plan.service';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
 import { UpdatePolicyPlanStatusDto } from './dto/update-policy-plan-status.dto';
-import { Public } from 'src/skipAuth.decorator';
-import { RoleDriver } from 'src/roleAuth.decorator';
+import { RoleAdmin, RoleDriver } from '../roleAuth.decorator';
 import { ValidationService } from './validation.service';
+import { Public } from 'src/skipAuth.decorator';
 
 @Controller('policy-plan')
 export class PolicyPlanController {
   constructor(private readonly policyPlanService: PolicyPlanService, private readonly validationService: ValidationService) { }
 
-  @Public()
+  @RoleAdmin()
   @Post()
   async create(@Body(ValidationPipe) createPolicyPlanDto: CreatePolicyPlanDto) {
     try {
@@ -19,7 +19,6 @@ export class PolicyPlanController {
       const newPolicyPlan = await this.policyPlanService.create(createPolicyPlanDto);
       return newPolicyPlan;
     } catch (error) {
-      console.log(error);
       if (error instanceof HttpException) {
         throw error;
       }
@@ -43,6 +42,7 @@ export class PolicyPlanController {
     }
   }
 
+  @Public()
   @Get(':id')
   @Public()
   async findOnePlanPolicy(@Param('id') id: string) {
@@ -61,7 +61,7 @@ export class PolicyPlanController {
   }
 
   @Get('/status/:id')
-  @Public()
+  @RoleAdmin()
   async findOnePlanPolicyWithStatus(@Param('id') id: string) {
     try {
       const policyPlans = await this.policyPlanService.findPlanPolicyWithStatus(id);
@@ -78,7 +78,7 @@ export class PolicyPlanController {
   }
 
   @Patch(':id')
-  @Public()
+  @RoleAdmin()
   async update(@Param("id", ParseUUIDPipe) id: string, @Body(ValidationPipe) updatePolicyPlanDto: UpdatePolicyPlanDto) {
     try {
       return this.policyPlanService.update(id, updatePolicyPlanDto);
@@ -91,7 +91,7 @@ export class PolicyPlanController {
   }
 
   @Patch('/status/:id')
-  @Public()
+  @RoleAdmin()
   async updateStatus(@Param("id", ParseUUIDPipe) id: string, @Body(ValidationPipe) updatePolicyPlanStatusDto: UpdatePolicyPlanStatusDto) {
     try {
       return this.policyPlanService.updateStatus(id, updatePolicyPlanStatusDto);
@@ -104,7 +104,7 @@ export class PolicyPlanController {
   }
 
   @Delete(':id')
-  @Public()
+  @RoleAdmin()
   async remove(@Param("id", ParseUUIDPipe) id: string) {
     try {
       return this.policyPlanService.remove(id);
@@ -117,12 +117,12 @@ export class PolicyPlanController {
   }
 
   @Get()
-  @Public()
+  @RoleAdmin()
   async findFilter(@Request() req, @Query("page", ParseIntPipe) query: number, @Query("status", ParseIntPipe) status: number,
     @Query("name") name: string) {
     try {
       if (query < 0) {
-        throw new BadRequestException("Invalid page status");
+        throw new BadRequestException("Invalid page");
       }
       switch (status) {
         case 0:

@@ -1,64 +1,372 @@
-import { Injectable } from '@nestjs/common';
-import { CreateReportDto } from './dto/create-report.dto';
-import { UpdateReportDto } from './dto/update-report.dto';
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { CreateReportDto } from "./dto/create-report.dto";
+import { PrismaService } from "../prisma.service";
+import { AssignReportDto } from "./dto/assign-report.dto";
+import { UpdateReportDictumDto } from "./dto/update-dictum.dto";
 
 @Injectable()
 export class ReportService {
-  create(createReportDto: CreateReportDto, file: Express.Multer.File) {
-    if (file) {
-      console.log('Si hay imagen');
-    } else {
-      console.log('No hay imagen');
+  constructor(private prisma: PrismaService) {}
+
+  async create(
+    createReportDto: CreateReportDto,
+    files: Express.MulterS3.File[],
+    idUser: number,
+  ) {
+
+    const policy = await this.prisma.policy.findUnique({
+      where: { serialNumber: createReportDto.serialNumber },
+    });
+
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: { plates: policy.plates },
+    });
+
+    if (!vehicle) {
+      throw new NotFoundException("Vehicle not found");
     }
 
-    console.log('Datos del Reporte:');
-    console.log('idReport:', createReportDto.idReport);
-    console.log('description:', createReportDto.description);
-    console.log('date:', createReportDto.date);
-    console.log('latitude:', createReportDto.latitude);
-    console.log('longitude:', createReportDto.longitude);
-    console.log('result:', createReportDto.result);
-    console.log('reportDecisionDate:', createReportDto.reportDecisionDate);
-    console.log('plates:', createReportDto.plates);
+    const photographsData = files.map((file) => ({
+      name: file.originalname,
+      url: file.location,
+    }));
 
-    console.log('Photographs:');
-    if (createReportDto.photographDto && createReportDto.photographDto.length > 0) {
-      createReportDto.photographDto.forEach((photo, index) => {
-        console.log(`Photograph ${index + 1}:`);
-        console.log('  idPhotograph:', photo.idPhotograph);
-        console.log('  name:', photo.name);
+    const reportNumber = await this.generateUniqueReportNumber();
+
+    const report = await this.prisma.report.create({
+      data: {
+        reportNumber: reportNumber,
+        description: "",
+        date: new Date(),
+        latitude: createReportDto.location.latitude,
+        longitude: createReportDto.location.longitude,
+        Vehicle: {
+          connect: { plates: vehicle.plates },
+        },
+        Status: {
+          connect: { idStatus: 1 },
+        },
+        Driver: {
+          connect: { idUser: idUser },
+        },
+        ImplicateParties: {
+          create: createReportDto.involvedPeople.map((person) => ({
+            name: person.name,
+            plates: person.plates,
+            Brand: {
+              connect: {
+                idBrand: person.brandId,
+              },
+            },
+            Color: {
+              connect: {
+                idColor: person.colorId,
+              },
+            },
+          })),
+        },
+        Photographs: {
+          create: photographsData,
+        },
+      },
+      include: {
+        ImplicateParties: true,
+        Photographs: true,
+        Vehicle: true,
+      },
+    });
+
+    return report.reportNumber;
+  }
+
+  async findReportByFilters(filters: any) {
+    return this.prisma.report.findUnique({
+      where: filters,
+      select: {
+        idReport: true,
+        date: true,
+        reportDecisionDate: true,
+        reportNumber: true,
+        Status: true,
+        Vehicle: {
+          select: {
+            plates: true,
+            Model: {
+              select: {
+                year: true,
+                Brand: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+            Policy: {
+              where: {
+                isCanceled: false,
+              },
+              orderBy: {
+                startDate: "desc",
+              },
+              take: 1,
+              select: {
+                PolicyPlan: {
+                  select: {
+                    title: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        AssignedEmployee: true
+      },
+    });
+  }
+
+  async findReports(filters: any, skip: number, take: number) {
+    return this.prisma.report.findMany({
+      where: filters,
+      select: {
+        idReport: true,
+        date: true,
+        reportDecisionDate: true,
+        reportNumber: true,
+        Status: true,
+        Vehicle: {
+          select: {
+            plates: true,
+            Model: {
+              select: {
+                year: true,
+                Brand: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+            Policy: {
+              where: {
+                isCanceled: false,
+              },
+              orderBy: {
+                startDate: "desc",
+              },
+              take: 1,
+              select: {
+                PolicyPlan: {
+                  select: {
+                    title: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        AssignedEmployee: true,
+      },
+      skip,
+      take,
+    });
+  }
+
+  async countReports(filters: any) {
+    return this.prisma.report.count({
+      where: filters,
+    });
+  }
+
+  async findDetailedReportByReportNumber(filters: any) {
+    return this.prisma.report.findUnique({
+      where: filters,
+      select: {
+        idReport: true,
+        reportNumber: true,
+        description: true,
+        date: true,
+        reportDecisionDate: true,
+        latitude: true,
+        longitude: true,
+        result: true,
+        Status: {
+          select: {
+            statusType: true,
+          },
+        },
+        Photographs: {
+          select: {
+            name: true,
+            url: true,
+          },
+        },
+        ImplicateParties: {
+          select: {
+            name: true,
+            plates: true,
+            Brand: {
+              select: {
+                name: true,
+              },
+            },
+            Color: {
+              select: {
+                vehicleColor: true,
+              },
+            },
+          },
+        },
+        Driver: {
+          select: {
+            phone: true,
+            licenseNumber: true,
+            Account: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+        Vehicle: {
+          select: {
+            plates: true,
+            serialNumberVehicle: true,
+            occupants: true,
+            Color: {
+              select: {
+                vehicleColor: true,
+              },
+            },
+            Model: {
+              select: {
+                year: true,
+                Brand: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+            Type: {
+              select: {
+                vehicleType: true,
+              },
+            },
+            ServiceVehicle: {
+              select: {
+                name: true,
+              },
+            },
+            Policy: {
+              where: {
+                isCanceled: false,
+              },
+              orderBy: {
+                startDate: "desc",
+              },
+              take: 1,
+              select: {
+                serialNumber: true,
+                startDate: true,
+                PolicyPlan: {
+                  select: {
+                    title: true,
+                    description: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async generateUniqueReportNumber(): Promise<string> {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let reportNumber = "";
+    let isUnique = false;
+
+    while (!isUnique) {
+      reportNumber = "";
+      for (let i = 0; i < 6; i++) {
+        reportNumber += characters.charAt(
+          Math.floor(Math.random() * characters.length),
+        );
+      }
+
+      const existingReport = await this.prisma.report.findUnique({
+        where: { reportNumber: reportNumber },
       });
-    } else {
-      console.log('No hay fotografías');
+
+      if (!existingReport) {
+        isUnique = true;
+      }
     }
 
-    console.log('Implicate Parties:');
-    if (createReportDto.implicatePartyDto && createReportDto.implicatePartyDto.length > 0) {
-      createReportDto.implicatePartyDto.forEach((party, index) => {
-        console.log(`Implicate Party ${index + 1}:`);
-        console.log('  idImplicateParty:', party.idImplicateParty);
-        console.log('  name:', party.name);
-        console.log('  idModel:', party.idModel);
-      });
-    } else {
-      console.log('No hay implicados');
+    return reportNumber;
+  }
+
+  async assignReport(reportNumber: string, assignReportDto: AssignReportDto) {
+    const { assignedEmployeeId } = assignReportDto;
+
+    const report = await this.prisma.report.findUnique({
+      where: { reportNumber: reportNumber }
+    });
+
+    if (!report) {
+      throw new NotFoundException('Reporte no encontrado');
     }
-    return 'This action adds a new report';
+
+    const employee = await this.prisma.employee.findUnique({
+      where: { idEmployee: assignedEmployeeId },
+      include: { EmployeeType: true }
+    });
+
+    if (!employee || employee.EmployeeType.idEmployeeType !== 3) {
+      throw new NotFoundException('Ajustador no encontrado o no es del tipo ajustador');
+    }
+
+    return this.prisma.report.update({
+      where: { reportNumber: reportNumber },
+      data: { assignedEmployeeId }
+    })
   }
 
-  findAll() {
-    return `This action returns all report`;
-  }
+  async updateReportDictum(
+    reportNumber: string,
+    updateReportDictumDto: UpdateReportDictumDto,
+    idEmployee: number
+  ) {
+    const report = await this.prisma.report.findUnique({
+      where: { reportNumber: reportNumber }
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} report`;
-  }
+    if (!report) {
+      throw new NotFoundException( `No se encontró el reporte con número de folio ${reportNumber}`);
+    }
 
-  update(id: number, updateReportDto: UpdateReportDto) {
-    return `This action updates a #${id} report`;
-  }
+    if (report.assignedEmployeeId !== idEmployee) {
+      throw new ForbiddenException('No tienes acceso para modificar este reporte');
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} report`;
+    await this.prisma.report.update({
+      where: {
+        reportNumber: reportNumber
+      },
+      data: {
+        result: updateReportDictumDto.result,
+        Status: {
+          connect: {
+            idStatus: 2
+          }
+        },
+        reportDecisionDate: new Date()
+      }
+    });
+
+    return;
+
   }
 }

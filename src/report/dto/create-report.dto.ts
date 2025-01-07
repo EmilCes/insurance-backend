@@ -1,43 +1,42 @@
+import { IsString, IsUUID, ValidateNested, IsArray, IsLatitude, IsLongitude, IsInt, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsString, IsNumber, Length, Matches, IsArray, ValidateNested, Min, Max, IsInt, ArrayMinSize, IsDecimal, IsDate } from 'class-validator';
-import { PhotographDto } from './photograph.dto';
-import { ImplicatePartyDto } from './implicate-party.dto';
+
+class LocationDto {
+  @IsLatitude()
+  @Type(() => Number)
+  latitude: number;
+
+  @IsLongitude()
+  @Type(() => Number)
+  longitude: number;
+}
+
+class InvolvedPersonDto {
+  @IsString()
+  name: string;
+
+  @IsInt()
+  @Type(() => Number)
+  brandId: number;
+
+  @IsInt()
+  @Type(() => Number)
+  colorId: number;
+
+  @IsString()
+  plates: string;
+}
 
 export class CreateReportDto {
-    @IsInt()
-    idReport: number;
+  @IsUUID()
+  serialNumber: string;
 
-    @IsString()
-    description: string;
+  @ValidateNested()
+  @Type(() => LocationDto)
+  location: LocationDto;
 
-    @IsDate()
-    date: Date;
-
-    @IsDecimal({ decimal_digits: '1,9' })
-    latitude: number;
-
-    @IsDecimal({ decimal_digits: '1,10' })
-    longitude: number;
-
-    @IsString()
-    result: string;
-
-    @IsDate()
-    reportDecisionDate: Date;
-
-    @Length(1, 9)
-    plates: string;
-
-    @IsArray()
-    @ArrayMinSize(1)
-    @ValidateNested({ each: true }) 
-    @Type(() => PhotographDto)  
-    photographDto: PhotographDto[];
-
-    @IsArray()
-    @ArrayMinSize(1)
-    @ValidateNested({ each: true }) 
-    @Type(() => ImplicatePartyDto)  
-    implicatePartyDto: ImplicatePartyDto[];
-    
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => InvolvedPersonDto)
+  involvedPeople: InvolvedPersonDto[];
 }

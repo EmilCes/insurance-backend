@@ -3,16 +3,13 @@ import {
   Body,
   ConflictException,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpException,
-  HttpStatus,
   NotFoundException,
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
-  Patch,
   Post,
   Put,
   Query,
@@ -22,9 +19,7 @@ import {
 } from "@nestjs/common";
 import { PoliciesService } from "./policies.service";
 import { CreatePolicyDto } from "./dto/create-policy.dto";
-import { Public } from "src/skipAuth.decorator";
-import { RoleAdjuster, RoleDriver } from "src/roleAuth.decorator";
-import { isUUID } from "class-validator";
+import { RoleDriver } from "src/roleAuth.decorator";
 import { UsersService } from "src/users/users.service";
 import { VehiclesService } from "src/vehicles/vehicles.service";
 
@@ -78,6 +73,7 @@ export class PoliciesController {
       }
       throw new BadRequestException("Error with the request data");
     } catch (err) {
+      console.log(err);
       if (err instanceof HttpException) {
         throw err;
       }
@@ -178,19 +174,19 @@ export class PoliciesController {
   @RoleDriver()
   @Get("/active")
   async findAllActivePolicies(@Request() req) {
-    console.log(req.user)
     try {
       const idUser = await this.usersService.getIdUserFromEmail(
-        req.user.username
+        req.user.username,
       );
 
       if (idUser <= 0) {
         throw new BadRequestException("Error with the request data");
       }
 
-      const activePolicies = await this.policiesService.findAllActivePoliciesByUser(
-        idUser
-      );
+      const activePolicies = await this.policiesService
+        .findAllActivePoliciesByUser(
+          idUser,
+        );
 
       if (activePolicies.length === 0) {
         throw new NotFoundException("No active policies found for the user");
@@ -198,6 +194,7 @@ export class PoliciesController {
 
       return activePolicies;
     } catch (err) {
+      console.log(err);
       if (err instanceof HttpException) {
         throw err;
       }
@@ -260,7 +257,7 @@ export class PoliciesController {
 
   @RoleDriver()
   @Get("/current/types")
-  async findAll(@Request() req) {
+  async findAllTypes(@Request() req) {
     try {
       const idUser = await this.usersService.getIdUserFromEmail(
         req.user.username,
@@ -305,5 +302,5 @@ export class PoliciesController {
       }
       throw new UnprocessableEntityException("Error finding one policy");
     }
-  }  
+  }
 }
