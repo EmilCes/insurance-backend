@@ -12,7 +12,8 @@ describe('VehiclesController', () => {
     validatePlates: jest.fn(),
     findColors: jest.fn(),
     findServices: jest.fn(),
-    findTypes: jest.fn()
+    findTypes: jest.fn(),
+    findAllVehicles: jest.fn()
   }
   const mockUsersService = {
     getIdUserFromEmail: jest.fn()
@@ -107,44 +108,90 @@ describe('VehiclesController', () => {
   });
 
   describe('validatePlates', () => {
-    const req = { user: { username: "jazmin@gmail.com" } };
-
     it('should return valid response', async () => {
-      const mockUserIdUser = 1;
-      mockUsersService.getIdUserFromEmail.mockResolvedValue(mockUserIdUser);
       const mockVehicle = { plates: "AAA-01-01" }
       mockVehiclesService.validatePlates.mockResolvedValue(mockVehicle);
       const mockNumberValidPolicies = 0
       mockPoliciesService.vehicleWithValidPolicies.mockResolvedValue(mockNumberValidPolicies);
 
-      const response = await controller.validatePlates(req, "AAA-01-1");
+      const response = await controller.validatePlates("AAA-01-1");
       expect(response).toEqual(undefined);
     })
 
-    it('should return bad request exception because user', async () => {
-      const mockUserIdUser = 0;
-      mockUsersService.getIdUserFromEmail.mockResolvedValue(mockUserIdUser);
-      
-      await expect(controller.validatePlates(req, "AAA-01-1")).rejects.toThrow(BadRequestException);
-    })
-
     it('should return bad request exception because plates with valid policy', async () => {
-      const mockUserIdUser = 1;
-      mockUsersService.getIdUserFromEmail.mockResolvedValue(mockUserIdUser);
       const mockVehicle = { plates: "AAA-01-01" };
       mockVehiclesService.validatePlates.mockResolvedValue(mockVehicle);
       const mockNumberValidPolicies = 1;
       mockPoliciesService.vehicleWithValidPolicies.mockResolvedValue(mockNumberValidPolicies);
-      
-      await expect(controller.validatePlates(req, "AAA-01-1")).rejects.toThrow(ConflictException);
+
+      await expect(controller.validatePlates("AAA-01-1")).rejects.toThrow(ConflictException);
     })
 
     it('should return unprocessable entity exception', async () => {
-      mockUsersService.getIdUserFromEmail.mockRejectedValue(new Error);
-      
-      await expect(controller.validatePlates(req, "AAA-01-1")).rejects.toThrow(UnprocessableEntityException);
+      mockPoliciesService.vehicleWithValidPolicies.mockRejectedValue(new Error);
+
+      await expect(controller.validatePlates("AAA-01-1")).rejects.toThrow(UnprocessableEntityException);
     })
 
   })
+
+  describe('findCurrentAllVehicles', () => {
+    const req = { user: { username: "jazmin@gmail.com" } };
+
+    it('should return all vehicles for the current user', async () => {
+      const mockUserId = 1;
+      mockUsersService.getIdUserFromEmail.mockResolvedValue(mockUserId);
+
+      const mockVehicles = [
+        {
+          idModel: 1, serialNumberVehicle: "ABC123", idColor: 1, plates: "XYZ-789", idType: 1,
+          idService: 1, occupants: 4, Model: { Brand: { idBrand: 1, name: "Toyota" }, year: "2022" },
+          Color: { vehicleColor: "Red" }, Type: { vehicleType: "SUV" },
+          ServiceVehicle: { name: "Private" }
+        },
+      ];
+
+      mockVehiclesService.findAllVehicles.mockResolvedValue(mockVehicles);
+
+      const result = await controller.findCurrentAllVehicles(req);
+      expect(result).toEqual([
+        {
+          idBrand: 1,
+          idModel: 1,
+          serialNumber: "ABC123",
+          idColor: 1,
+          plates: "XYZ-789",
+          idType: 1,
+          idService: 1,
+          occupants: 4,
+          brandName: "Toyota",
+          modelName: "2022",
+          colorName: "Red",
+          typeName: "SUV",
+          serviceName: "Private"
+        },
+      ]);
+    });
+
+    it('should throw BadRequestException if user does not exist', async () => {
+      mockUsersService.getIdUserFromEmail.mockResolvedValue(0);
+
+      await expect(controller.findCurrentAllVehicles(req)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw NotFoundException if no vehicles are found', async () => {
+      mockUsersService.getIdUserFromEmail.mockResolvedValue(1);
+      mockVehiclesService.findAllVehicles.mockResolvedValue([]);
+
+      await expect(controller.findCurrentAllVehicles(req)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw UnprocessableEntityException on error', async () => {
+      mockUsersService.getIdUserFromEmail.mockRejectedValue(new Error);
+
+      await expect(controller.findCurrentAllVehicles(req)).rejects.toThrow(UnprocessableEntityException);
+    });
+  });
+
 
 });

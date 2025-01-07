@@ -27,6 +27,9 @@ describe('PoliciesService', () => {
     model: {
       findUnique: jest.fn()
     },
+    vehicle: {
+      findUnique: jest.fn()
+    },
     $transaction: jest.fn()
   }
 
@@ -54,6 +57,7 @@ describe('PoliciesService', () => {
       const mockTypeData = { idType: 1 }
       const mockModelData = { idModel: 1 }
       const mockPolicyPlan = { idPolicyPlan: "7014710fidafr" }
+      mockPrismaService.vehicle.findUnique.mockResolvedValue({plates: "AAA-13-13"});
       mockPrismaService.serviceVehicle.findUnique.mockResolvedValue(mockServiceData);
       mockPrismaService.type.findUnique.mockResolvedValue(mockTypeData);
       mockPrismaService.model.findUnique.mockResolvedValue(mockModelData);
@@ -70,6 +74,7 @@ describe('PoliciesService', () => {
 
     it('should return bad request exception service doesnt exists', async () => {
       const mockServiceData = null
+      mockPrismaService.vehicle.findUnique.mockResolvedValue({plates: "AAA-13-13"});
       mockPrismaService.serviceVehicle.findUnique.mockResolvedValue(mockServiceData);
 
       const createPolicyDto = {
@@ -82,6 +87,7 @@ describe('PoliciesService', () => {
     it('should return bad request exception type doesnt exists', async () => {
       const mockServiceData = { idService: 1 }
       const mockTypeData = null
+      mockPrismaService.vehicle.findUnique.mockResolvedValue({plates: "AAA-13-13"});
       mockPrismaService.serviceVehicle.findUnique.mockResolvedValue(mockServiceData);
       mockPrismaService.type.findUnique.mockResolvedValue(mockTypeData);
 
@@ -96,6 +102,7 @@ describe('PoliciesService', () => {
       const mockServiceData = { idService: 1 }
       const mockTypeData = { idType: 1 }
       const mockModelData = null
+      mockPrismaService.vehicle.findUnique.mockResolvedValue({plates: "AAA-13-13"});
       mockPrismaService.serviceVehicle.findUnique.mockResolvedValue(mockServiceData);
       mockPrismaService.type.findUnique.mockResolvedValue(mockTypeData);
       mockPrismaService.model.findUnique.mockResolvedValue(mockModelData);
@@ -112,6 +119,7 @@ describe('PoliciesService', () => {
       const mockTypeData = { idType: 1 }
       const mockModelData = { idModel: 1 }
       const mockPolicyPlan = null
+      mockPrismaService.vehicle.findUnique.mockResolvedValue({plates: "AAA-13-13"});
       mockPrismaService.serviceVehicle.findUnique.mockResolvedValue(mockServiceData);
       mockPrismaService.type.findUnique.mockResolvedValue(mockTypeData);
       mockPrismaService.model.findUnique.mockResolvedValue(mockModelData);
@@ -424,7 +432,7 @@ describe('PoliciesService', () => {
       const mockPolicyWithPlate =[ { startDate: "2024-12-12T00:00:00.000Z", yearsPolicy: 1, isCanceled: false}];
       mockPrismaService.policy.findMany.mockResolvedValue(mockPolicyWithPlate);
       
-      const response = await service.vehicleWithValidPolicies("AAA-01-1", 1);
+      const response = await service.vehicleWithValidPolicies("AAA-01-1");
       expect(response).toEqual(1);
     })
 
@@ -432,7 +440,7 @@ describe('PoliciesService', () => {
       const mockPolicyWithPlate = [];
       mockPrismaService.policy.findMany.mockResolvedValue(mockPolicyWithPlate);
       
-      const response = await service.vehicleWithValidPolicies("AAA-01-1", 1);
+      const response = await service.vehicleWithValidPolicies("AAA-01-1");
       expect(response).toEqual(0);
     })
   })

@@ -8,7 +8,8 @@ describe('VehiclesService', () => {
 
   const mockPrismaService = {
     vehicle: {
-      findUnique: jest.fn()
+      findUnique: jest.fn(),
+      findMany: jest.fn()
     },
     color: {
       findMany: jest.fn()
@@ -92,6 +93,38 @@ describe('VehiclesService', () => {
       expect(result).toEqual(mockTypes);
     });
   })
+
+  describe('findAllVehicles', () => {
+    it('should return all vehicles for a given user', async () => {
+      const mockVehicles = [
+        {
+          idModel: 1,
+          serialNumberVehicle: 'ABC123',
+          idColor: 1,
+          plates: 'XYZ-789',
+          idType: 1,
+          idService: 1,
+          occupants: 4,
+          Model: { Brand: { idBrand: 1, name: 'Toyota' }, year: '2022' },
+          Color: { vehicleColor: 'Red' },
+          Type: { vehicleType: 'SUV' },
+          ServiceVehicle: { name: 'Private' },
+        },
+      ];
+
+      mockPrismaService.vehicle.findMany.mockResolvedValue(mockVehicles);
+
+      const result = await service.findAllVehicles(1);
+      expect(result).toEqual(mockVehicles);
+    });
+
+    it('should return empty array when no vehicles found', async () => {
+      mockPrismaService.vehicle.findMany.mockResolvedValue([]);
+
+      const result = await service.findAllVehicles(1);
+      expect(result).toEqual([]);
+    });
+  });
 
 
   describe('validatePlates', () => {
