@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,6 +10,8 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { PoliciesModule } from './policies/policies.module';
 import { PolicyPlanModule } from './policy-plan/policy-plan.module';
 import { ReportModule } from './report/report.module';
+import { MunicipalityModule } from './municipality/municipality.module';
+import { StateModule } from './state/state.module';
 import { AwsConfigService } from './AWS/aws-config.service';
 import { AwsConfigModule } from './AWS/aws-config.module';
 import { NestjsFormDataModule } from 'nestjs-form-data';
@@ -19,7 +22,7 @@ import { EmployeeModule } from './employee/employee.module';
     isGlobal: true,
     envFilePath: '.env'
   }), AuthModule, UsersModule, BrandsModule, VehiclesModule, 
-  PoliciesModule, PolicyPlanModule, ReportModule, AwsConfigModule,
+  PoliciesModule, PolicyPlanModule, ReportModule,  MunicipalityModule, StateModule, AwsConfigModule,
   NestjsFormDataModule,
   EmployeeModule
 ],
