@@ -22,8 +22,8 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
         @IsString()
         bankAccountNumber: string;
     
-        @IsDate()
-        expirationDateBankAccount: Date;
+        @IsString()
+        expirationDateBankAccount: string;
     
         @IsString()
         licenseNumber: string;
@@ -44,7 +44,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
         @IsString()
         secretKey?: string;
     
-        @IsDate()
-        datebirth: Date;
+        @IsString()
+        datebirth: string;
 }
 

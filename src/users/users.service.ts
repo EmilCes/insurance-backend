@@ -140,8 +140,6 @@ export class UsersService {
     return driverFound;
   }
 
-
-
   async signIn(email: string) {
     const userFound = await this.prisma.account.findFirst({ where: { email: email } });
     if (!userFound)
@@ -185,24 +183,43 @@ export class UsersService {
     return employeeType.EmployeeType.employeeType;
   }
 
-  async saveTwoFactorSecret(email: string, secret: string) {
-    const user = await this.prisma.account.findFirst({ where: { email: { equals: email } } });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    await this.prisma.account.update({
-      where: { idAccount: user.idAccount },
-      data: { secretKey: secret },
-    });
-  }
-
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async setTwoFactorAuthenticationSecret(secret: string, email: string) {
+    const userFound = await this.prisma.account.findFirst({ where: { email: email } });
+
+    await this.prisma.account.update({
+      where: {
+        idAccount: userFound.idAccount
+      },
+      data: {
+        secretKey: secret, 
+      },
+    });
+  }
+
+  async is2faEnabled(email: string){
+      const userFound = await this.prisma.account.findFirst({ where: { email: email } });
+
+      return userFound.twoFactorIsEnabled;
+  }
+
+  async turnOnTwoFactorAuthentication(email: string) {
+    const userFound = await this.prisma.account.findFirst({ where: { email: email } });
+
+    await this.prisma.account.update({
+      where: {
+        idAccount: userFound.idAccount, 
+      },
+      data: {
+        twoFactorIsEnabled: true,
+      },
+    });
   }
 }

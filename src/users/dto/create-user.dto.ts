@@ -19,8 +19,8 @@ export class CreateUserDto {
     @IsString()
     bankAccountNumber: string;
 
-    @IsDate()
-    expirationDateBankAccount: Date;
+    @IsString()
+    expirationDateBankAccount: string;
 
     @IsString()
     licenseNumber: string;
@@ -41,6 +41,6 @@ export class CreateUserDto {
     @IsString()
     secretKey?: string;
 
-    @IsDate()
-    datebirth: Date;
+    @IsString()
+    datebirth: string;
 }

@@ -140,6 +140,7 @@ model Account {
   Driver           Driver?      @relation(fields: [idUser], references: [idUser])
   Employee         Employee?
   secretKey        String       @db.VarChar(100) @default("default_secret_key")
+  twoFactorIsEnabled Boolean @default(false)
 }
 
 model Municipality {
