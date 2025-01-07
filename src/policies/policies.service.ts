@@ -263,9 +263,9 @@ export class PoliciesService {
     return policies;
   }
 
-  async vehicleWithValidPolicies(plates: string, idUser: number) {
+  async vehicleWithValidPolicies(plates: string) {
     const policiesWithPlate = await this.prisma.policy.findMany({
-      where: { plates: { equals: plates }, idUser: idUser },
+      where: { plates: { equals: plates } },
       select: { startDate: true, yearsPolicy: true, isCanceled: true }
     });
 

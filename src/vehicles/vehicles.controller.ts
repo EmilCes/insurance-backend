@@ -99,23 +99,16 @@ export class VehiclesController {
 
   @RoleDriver()
   @Get('/plates/:plates')
-  async validatePlates(@Request() req, @Param('plates') plates: string) {
+  async validatePlates(@Param('plates') plates: string) {
     try {
-      const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
-      if (idUser <= 0) {
-        throw new BadRequestException("Driver doesnt exists");
-      }
-
       const vehicle = await this.vehiclesService.validatePlates(plates);
       if (vehicle) {
-        const numberValidPoliciesWithPlates = await this.policiesService.vehicleWithValidPolicies(plates, idUser);
+        const numberValidPoliciesWithPlates = await this.policiesService.vehicleWithValidPolicies(plates);
         if (numberValidPoliciesWithPlates > 0) {
           throw new ConflictException("Plates found with a valid policy");
         }
       }
-
       return;
-
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -123,7 +116,4 @@ export class VehiclesController {
       throw new UnprocessableEntityException("Error validating the plates");
     }
   }
-
-
-
 }
