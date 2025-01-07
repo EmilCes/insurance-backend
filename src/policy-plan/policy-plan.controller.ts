@@ -44,7 +44,8 @@ export class PolicyPlanController {
 
   @Public()
   @Get(':id')
-  @Public()
+  @RoleAdmin()
+  @RoleDriver()
   async findOnePlanPolicy(@Param('id') id: string) {
     try {
       const policyPlans = await this.policyPlanService.findPlanPolicy(id);

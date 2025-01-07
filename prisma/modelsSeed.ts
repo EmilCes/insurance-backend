@@ -140,7 +140,7 @@ export const vehicle = [
 export const policies = [
     {
         serialNumber: "0cafd594-2186-4f3a-851d-9ef334e3acaa", monthsOfPayment: 4, yearsPolicy: 3, isCanceled: false, coveredCost: 12330,
-        startDate: new Date("2024-12-12"), planTitle: "Limitada", planDescription: "Cubre la Responsabilidad Civil, Asistencia Legal, Gastos médicos a ocupantes y Robo Total",
+        startDate: new Date("2024-12-12"), planTitle: "Amplia Plus", planDescription: "Cubre la Responsabilidad Civil, Asistencia Legal, Gastos médicos a ocupantes y Robo Total",
         idPolicyPlan: "a09be575-f839-4ba1-bfd9-e64c3f59e1b8", plates: "AAA-01-01", idUser: 1
     }
 ]
