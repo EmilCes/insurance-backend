@@ -13,7 +13,6 @@ export class ReportService {
     files: Express.MulterS3.File[],
     idUser: number,
   ) {
-    console.log(createReportDto);
 
     const policy = await this.prisma.policy.findUnique({
       where: { serialNumber: createReportDto.serialNumber },

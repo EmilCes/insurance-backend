@@ -32,7 +32,7 @@ export class AuthService {
 
     }
 
-    public generateJwt(payload: any) {
+    public generateJwt(payload: { sub: number, username: string, role: string }) {
         return this.jwtService.sign(payload);
       }
 
