@@ -14,6 +14,7 @@ export class PoliciesService {
   ) { }
 
   async create(createPolicyDto: CreatePolicyDto, idUser: number) {
+    const vehicleExist = await this.prisma.vehicle.findUnique({ where: { plates: createPolicyDto.plates }, select: { plates: true } })
     const serviceVehicle = await this.prisma.serviceVehicle.findUnique({ where: { idService: createPolicyDto.idService } })
     const typeVehicle = await this.prisma.type.findUnique({ where: { idType: createPolicyDto.idType } })
     const modelVehicle = await this.prisma.model.findUnique({ where: { idModel: createPolicyDto.idModel, idBrand: createPolicyDto.idBrand } })
@@ -34,17 +35,19 @@ export class PoliciesService {
     let policyCreated = null;
 
     await this.prisma.$transaction(async (prisma) => {
-      const policyVehicle = await prisma.vehicle.create({
-        data: {
-          plates: createPolicyDto.plates,
-          serialNumberVehicle: createPolicyDto.series,
-          occupants: createPolicyDto.occupants,
-          idService: createPolicyDto.idService,
-          idType: createPolicyDto.idType,
-          idModel: createPolicyDto.idModel,
-          idColor: createPolicyDto.idColor
-        }
-      });
+      if (vehicleExist == null) {
+        const policyVehicle = await prisma.vehicle.create({
+          data: {
+            plates: createPolicyDto.plates,
+            serialNumberVehicle: createPolicyDto.series,
+            occupants: createPolicyDto.occupants,
+            idService: createPolicyDto.idService,
+            idType: createPolicyDto.idType,
+            idModel: createPolicyDto.idModel,
+            idColor: createPolicyDto.idColor
+          }
+        });
+      }
 
       const policy = await prisma.policy.create({
         data: {
@@ -72,7 +75,7 @@ export class PoliciesService {
           },
         });
       }
-      
+
       policyCreated = {
         serialNumber: policy.serialNumber, planTitle: policy.planTitle,
         planDescription: policy.planDescription
@@ -283,7 +286,7 @@ export class PoliciesService {
 
   async findAllActivePoliciesByUser(idUser: number) {
     const currentDate = new Date();
-  
+
     // Obtiene todas las pólizas no canceladas del usuario
     const policies = await this.prisma.policy.findMany({
       where: {
@@ -302,12 +305,12 @@ export class PoliciesService {
                 Brand: { select: { name: true } },
               },
             },
-            Color: { select: { vehicleColor: true}}
+            Color: { select: { vehicleColor: true } }
           },
         },
       },
     });
-  
+
     const activePolicies = policies.filter((policy) => {
       const start = new Date(policy.startDate);
       const endDate = new Date(
@@ -317,10 +320,10 @@ export class PoliciesService {
       );
       return endDate >= currentDate;
     });
-  
+
     return activePolicies;
   }
-  
+
 
 }
 

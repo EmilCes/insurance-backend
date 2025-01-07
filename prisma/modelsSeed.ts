@@ -10,11 +10,6 @@ export const employee = [
     { idEmployee: 3, employeeNumber: 3, idEmployeeType: 2 }
 ]
 
-export const status = [
-    { idStatus: 1, statusType: "Vigente" },
-    { idStatus: 2, statusType: "No vigente" }
-]
-
 export const state = [
     { idState: 1, stateName: "Veracruz" },
     { idState: 2, stateName: "Puebla" }

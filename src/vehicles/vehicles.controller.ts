@@ -59,6 +59,44 @@ export class VehiclesController {
 
   }
 
+  @Get('/currentAll')
+  @RoleDriver()
+  async findCurrentAllVehicles(@Request() req) {
+    try {
+      const idUser = await this.usersService.getIdUserFromEmail(req.user.username);
+      if (idUser <= 0) {
+        throw new BadRequestException("Driver doesnt exists");
+      }
+
+      const vehicles = await this.vehiclesService.findAllVehicles(idUser);
+      if (!vehicles || vehicles.length <= 0) {
+        throw new NotFoundException(`Vehicles not found`);
+      }
+
+      return vehicles.map((vehicle) => ({
+        idBrand: vehicle.Model.Brand.idBrand,
+        idModel: vehicle.idModel,
+        serialNumber: vehicle.serialNumberVehicle,
+        idColor: vehicle.idColor,
+        plates: vehicle.plates,
+        idType: vehicle.idType,
+        idService: vehicle.idService,
+        occupants: vehicle.occupants,
+        brandName: vehicle.Model.Brand.name,
+        modelName: vehicle.Model.year,
+        colorName: vehicle.Color.vehicleColor,
+        typeName: vehicle.Type.vehicleType,
+        serviceName: vehicle.ServiceVehicle.name
+      }));
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new UnprocessableEntityException("Error getting the vehicles");
+    }
+
+  }
+
   @RoleDriver()
   @Get('/plates/:plates')
   async validatePlates(@Request() req, @Param('plates') plates: string) {
@@ -71,11 +109,11 @@ export class VehiclesController {
       const vehicle = await this.vehiclesService.validatePlates(plates);
       if (vehicle) {
         const numberValidPoliciesWithPlates = await this.policiesService.vehicleWithValidPolicies(plates, idUser);
-        if(numberValidPoliciesWithPlates > 0){
+        if (numberValidPoliciesWithPlates > 0) {
           throw new ConflictException("Plates found with a valid policy");
-        }       
+        }
       }
-      
+
       return;
 
     } catch (err) {
@@ -85,5 +123,7 @@ export class VehiclesController {
       throw new UnprocessableEntityException("Error validating the plates");
     }
   }
+
+
 
 }
