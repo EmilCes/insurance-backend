@@ -84,7 +84,7 @@ export class ReportController {
       idUser = await this.usersService.getIdUserFromEmail(req.user.username);
     } else if (role === "Ajustador" || role === "Ejecutivo de asistencia") {
       idEmployee = await this.employeeService.getIdEmployeeFromEmail(
-        req.user.username
+        req.user.username,
       );
     }
 
@@ -116,9 +116,15 @@ export class ReportController {
         );
 
         if (!report) {
-          throw new NotFoundException(
-            `No se encontro el reporte con numero de folio ${reportNumber}`,
-          );
+          return {
+            data: [],
+            pageInfo: {
+              totalItems: 0,
+              totalPages: 0,
+              currentPage: page,
+              itemsPerPage: pageSize,
+            },
+          };
         }
 
         const formattedReport = this.formatReport(report);
@@ -179,6 +185,18 @@ export class ReportController {
         skip,
         pageSize,
       );
+
+      if (!reports || reports.length === 0) {
+        return {
+          data: [],
+          pageInfo: {
+            totalItems: 0,
+            totalPages: 0,
+            currentPage: page,
+            itemsPerPage: pageSize,
+          },
+        };
+      }
 
       const formattedReports = reports.map((report) =>
         this.formatReport(report)
