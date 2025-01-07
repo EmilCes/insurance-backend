@@ -115,6 +115,7 @@ export class ReportController {
           filters,
         );
 
+
         if (!report) {
           return {
             data: [],

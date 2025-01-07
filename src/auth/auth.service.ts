@@ -14,7 +14,7 @@ export class AuthService {
         private jwtService: JwtService
     ) { }
 
-    async signIn(email: string, password: string, twoFactorAuthenticationCode: string): Promise<any> {
+    async signIn(email: string, password: string): Promise<any> {
         const user = await this.usersService.signIn(email);
 
         if (user?.password !== password) {
@@ -34,7 +34,7 @@ export class AuthService {
 
     }
 
-    async firstSignIn(email: string, twoFactorAuthenticationCode: string){
+    async firstSignIn(email: string){
         const user = await this.usersService.signIn(email);
 
         const role = (user.idEmployee ? await this.employeeService.getTypeEmployee(user.idEmployee) : "Conductor");
@@ -80,8 +80,6 @@ export class AuthService {
 
     async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, email: string) {
         const user = await this.usersService.signIn(email);
-
-        console.log(twoFactorAuthenticationCode + user.secretKey)
 
         return authenticator.verify({
             token: twoFactorAuthenticationCode,

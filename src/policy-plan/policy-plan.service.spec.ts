@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PolicyPlanService } from './policy-plan.service';
 import { PrismaService } from '../prisma.service';
-import { NotFoundException } from '@nestjs/common';
 
 describe('PolicyPlanService', () => {
   let service: PolicyPlanService;

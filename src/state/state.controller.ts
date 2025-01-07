@@ -8,29 +8,10 @@ import { Public } from 'src/skipAuth.decorator';
 export class StateController {
   constructor(private readonly stateService: StateService) {}
 
-  @Post()
-  create(@Body() createStateDto: CreateStateDto) {
-    return this.stateService.create(createStateDto);
-  }
-
   @Public()
   @Get()
   findAll() {
     return this.stateService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.stateService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStateDto: UpdateStateDto) {
-    return this.stateService.update(+id, updateStateDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.stateService.remove(+id);
-  }
 }

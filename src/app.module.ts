@@ -12,8 +12,8 @@ import { PolicyPlanModule } from './policy-plan/policy-plan.module';
 import { ReportModule } from './report/report.module';
 import { MunicipalityModule } from './municipality/municipality.module';
 import { StateModule } from './state/state.module';
-import { AwsConfigService } from './AWS/aws-config.service';
-import { AwsConfigModule } from './AWS/aws-config.module';
+import { AwsConfigService } from './aws/aws-config.service';
+import { AwsConfigModule } from './aws/aws-config.module';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { EmployeeModule } from './employee/employee.module';
 

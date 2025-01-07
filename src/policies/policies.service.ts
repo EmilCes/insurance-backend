@@ -1,23 +1,36 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreatePolicyDto } from './dto/create-policy.dto';
-import { PrismaService } from '../prisma.service';
-import { Prisma } from '@prisma/client';
-import { VehiclesService } from '../vehicles/vehicles.service';
-import { equals } from 'class-validator';
+import {
+  BadRequestException,
+  Injectable,
+} from "@nestjs/common";
+import { CreatePolicyDto } from "./dto/create-policy.dto";
+import { PrismaService } from "../prisma.service";
+import { Prisma } from "@prisma/client";
 
 const numberPoliciesPerPage = 4;
 
 @Injectable()
 export class PoliciesService {
   constructor(
-    private prisma: PrismaService
-  ) { }
+    private prisma: PrismaService,
+  ) {}
 
   async create(createPolicyDto: CreatePolicyDto, idUser: number) {
-    const vehicleExist = await this.prisma.vehicle.findUnique({ where: { plates: createPolicyDto.plates }, select: { plates: true } })
-    const serviceVehicle = await this.prisma.serviceVehicle.findUnique({ where: { idService: createPolicyDto.idService } })
-    const typeVehicle = await this.prisma.type.findUnique({ where: { idType: createPolicyDto.idType } })
-    const modelVehicle = await this.prisma.model.findUnique({ where: { idModel: createPolicyDto.idModel, idBrand: createPolicyDto.idBrand } })
+    const vehicleExist = await this.prisma.vehicle.findUnique({
+      where: { plates: createPolicyDto.plates },
+      select: { plates: true },
+    });
+    const serviceVehicle = await this.prisma.serviceVehicle.findUnique({
+      where: { idService: createPolicyDto.idService },
+    });
+    const typeVehicle = await this.prisma.type.findUnique({
+      where: { idType: createPolicyDto.idType },
+    });
+    const modelVehicle = await this.prisma.model.findUnique({
+      where: {
+        idModel: createPolicyDto.idModel,
+        idBrand: createPolicyDto.idBrand,
+      },
+    });
 
     if (!serviceVehicle || !typeVehicle || !modelVehicle) {
       throw new BadRequestException("Vehicle data not correct");
@@ -25,7 +38,7 @@ export class PoliciesService {
 
     const policyPlan = await this.prisma.policyPlan.findUnique({
       where: { idPolicyPlan: createPolicyDto.idPolicyPlan },
-      include: { Service: true }
+      include: { Service: true },
     });
 
     if (!policyPlan) {
@@ -44,8 +57,8 @@ export class PoliciesService {
             idService: createPolicyDto.idService,
             idType: createPolicyDto.idType,
             idModel: createPolicyDto.idModel,
-            idColor: createPolicyDto.idColor
-          }
+            idColor: createPolicyDto.idColor,
+          },
         });
       }
 
@@ -54,13 +67,15 @@ export class PoliciesService {
           monthsOfPayment: createPolicyDto.perMonthsPayment,
           yearsPolicy: createPolicyDto.yearOfPolicy,
           isCanceled: false,
-          coveredCost: new Prisma.Decimal(+policyPlan.basePrice * createPolicyDto.yearOfPolicy),
+          coveredCost: new Prisma.Decimal(
+            +policyPlan.basePrice * createPolicyDto.yearOfPolicy,
+          ),
           startDate: new Date(),
           planTitle: policyPlan.title,
           planDescription: policyPlan.description,
           idPolicyPlan: policyPlan.idPolicyPlan,
           plates: createPolicyDto.plates,
-          idUser: idUser
+          idUser: idUser,
         },
       });
 
@@ -71,16 +86,17 @@ export class PoliciesService {
             name: service.name,
             isCovered: service.isCovered,
             coveredCost: service.coveredCost,
-            serialNumber: policy.serialNumber
+            serialNumber: policy.serialNumber,
           },
         });
       }
 
       policyCreated = {
-        serialNumber: policy.serialNumber, planTitle: policy.planTitle,
-        planDescription: policy.planDescription
+        serialNumber: policy.serialNumber,
+        planTitle: policy.planTitle,
+        planDescription: policy.planDescription,
       };
-    })
+    });
 
     return policyCreated;
   }
@@ -89,20 +105,24 @@ export class PoliciesService {
     const policies = await this.prisma.policy.findMany({
       where: { idUser: 1 },
       select: {
-        serialNumber: true, planTitle: true, startDate: true, yearsPolicy: true, isCanceled: true,
+        serialNumber: true,
+        planTitle: true,
+        startDate: true,
+        yearsPolicy: true,
+        isCanceled: true,
         Vehicle: {
           select: {
             Model: {
               select: {
                 year: true,
-                Brand: { select: { name: true } }
-              }
-            }
-          }
-        }
+                Brand: { select: { name: true } },
+              },
+            },
+          },
+        },
       },
       take: numberPoliciesPerPage,
-      skip: ((page - 1) * numberPoliciesPerPage)
+      skip: ((page - 1) * numberPoliciesPerPage),
     });
 
     if (policies.length <= 0) {
@@ -111,93 +131,176 @@ export class PoliciesService {
     return policies;
   }
 
-  async findAllFilter(page: number, type: string, status: number, idPolicy: string, idUser: number) {
+  async findAllFilter(
+    page: number,
+    type: string,
+    status: number,
+    idPolicy: string,
+    idUser: number,
+  ) {
     const planTitle = (type == "0") ? {} : { equals: type };
     const statusCanceled = (status == 3) ? true : {};
-    const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy }
+    const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy };
 
     const policies = await this.prisma.policy.findMany({
       where: {
-        idUser: idUser, isCanceled: statusCanceled, planTitle, serialNumber
+        idUser: idUser,
+        isCanceled: statusCanceled,
+        planTitle,
+        serialNumber,
       },
       select: {
-        serialNumber: true, planTitle: true, startDate: true, yearsPolicy: true, isCanceled: true, idPolicyPlan: true,
-        Vehicle: { select: { Model: { select: { year: true, Brand: { select: { name: true } } } } } }
+        serialNumber: true,
+        planTitle: true,
+        startDate: true,
+        yearsPolicy: true,
+        isCanceled: true,
+        idPolicyPlan: true,
+        Vehicle: {
+          select: {
+            Model: {
+              select: { year: true, Brand: { select: { name: true } } },
+            },
+          },
+        },
       },
       take: numberPoliciesPerPage,
-      skip: ((page - 1) * numberPoliciesPerPage)
+      skip: ((page - 1) * numberPoliciesPerPage),
     });
 
     return policies;
   }
 
-  async findActiveInvalidPolicies(page: number, type: string, status: number, idPolicy: string, idUser: number) {
+  async findActiveInvalidPolicies(
+    page: number,
+    type: string,
+    status: number,
+    idPolicy: string,
+    idUser: number,
+  ) {
     const currentDate = new Date();
     const planTitle = (type == "0") ? {} : { equals: type };
-    const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy }
+    const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy };
 
     const policies = await this.prisma.policy.findMany({
       where: {
-        idUser: idUser, planTitle, serialNumber, isCanceled: false
+        idUser: idUser,
+        planTitle,
+        serialNumber,
+        isCanceled: false,
       },
       select: {
-        serialNumber: true, planTitle: true, startDate: true, yearsPolicy: true, isCanceled: true, idPolicyPlan: true,
-        Vehicle: { select: { Model: { select: { year: true, Brand: { select: { name: true } } } } } }
-      }
+        serialNumber: true,
+        planTitle: true,
+        startDate: true,
+        yearsPolicy: true,
+        isCanceled: true,
+        idPolicyPlan: true,
+        Vehicle: {
+          select: {
+            Model: {
+              select: { year: true, Brand: { select: { name: true } } },
+            },
+          },
+        },
+      },
     });
 
     if (status == 1) {
       const activePolicies = policies.filter((policy) => {
-        const start = new Date(policy.startDate)
-        const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
+        const start = new Date(policy.startDate);
+        const endDate = new Date(
+          start.getFullYear() + policy.yearsPolicy,
+          start.getMonth(),
+          start.getDate(),
+        );
         return endDate >= currentDate;
       });
-      return activePolicies.slice((page - 1) * numberPoliciesPerPage, numberPoliciesPerPage * page);
+      return activePolicies.slice(
+        (page - 1) * numberPoliciesPerPage,
+        numberPoliciesPerPage * page,
+      );
     }
 
     const notValidPolicies = policies.filter((policy) => {
-      const start = new Date(policy.startDate)
-      const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
+      const start = new Date(policy.startDate);
+      const endDate = new Date(
+        start.getFullYear() + policy.yearsPolicy,
+        start.getMonth(),
+        start.getDate(),
+      );
       return endDate < currentDate;
     });
-    return notValidPolicies.slice((page - 1) * numberPoliciesPerPage, numberPoliciesPerPage * page);
+    return notValidPolicies.slice(
+      (page - 1) * numberPoliciesPerPage,
+      numberPoliciesPerPage * page,
+    );
   }
 
-  async findAllTotal(type: string, status: number, idPolicy: string, idUser: number) {
+  async findAllTotal(
+    type: string,
+    status: number,
+    idPolicy: string,
+    idUser: number,
+  ) {
     const planTitle = (type == "0") ? {} : { equals: type };
     const statusCanceled = (status == 3) ? true : {};
-    const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy }
+    const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy };
 
-    const policies = await this.prisma.policy.count({ where: { idUser: idUser, planTitle, isCanceled: statusCanceled, serialNumber } });
+    const policies = await this.prisma.policy.count({
+      where: {
+        idUser: idUser,
+        planTitle,
+        isCanceled: statusCanceled,
+        serialNumber,
+      },
+    });
     return policies;
   }
 
-  async findAllTotalStatus(type: string, status: number, idPolicy: string, idUser: number) {
+  async findAllTotalStatus(
+    type: string,
+    status: number,
+    idPolicy: string,
+    idUser: number,
+  ) {
     const planTitle = (type == "0") ? {} : { equals: type };
-    const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy }
+    const serialNumber = (idPolicy == undefined) ? {} : { contains: idPolicy };
     const currentDate = new Date();
 
     const policies = await this.prisma.policy.findMany({
       where: {
-        idUser: idUser, planTitle, serialNumber, isCanceled: false
+        idUser: idUser,
+        planTitle,
+        serialNumber,
+        isCanceled: false,
       },
       select: {
-        startDate: true, yearsPolicy: true
-      }
+        startDate: true,
+        yearsPolicy: true,
+      },
     });
 
     if (status == 1) {
       const activePolicies = policies.filter((policy) => {
-        const start = new Date(policy.startDate)
-        const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
+        const start = new Date(policy.startDate);
+        const endDate = new Date(
+          start.getFullYear() + policy.yearsPolicy,
+          start.getMonth(),
+          start.getDate(),
+        );
         return endDate >= currentDate;
       });
       return activePolicies.length;
     }
 
     const notValidPolicies = policies.filter((policy) => {
-      const start = new Date(policy.startDate)
-      const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
+      const start = new Date(policy.startDate);
+      const endDate = new Date(
+        start.getFullYear() + policy.yearsPolicy,
+        start.getMonth(),
+        start.getDate(),
+      );
       return endDate < currentDate;
     });
     return notValidPolicies.length;
@@ -212,38 +315,49 @@ export class PoliciesService {
             rfc: true,
             Account: {
               select: {
-                name: true, lastName: true, postalCode: true, address: true,
+                name: true,
+                lastName: true,
+                postalCode: true,
+                address: true,
                 Municipality: {
                   select: {
                     municipalityName: true,
-                    State: { select: { stateName: true } }
-                  }
-                }
-              }
-            }
-          }
+                    State: { select: { stateName: true } },
+                  },
+                },
+              },
+            },
+          },
         },
         Vehicle: {
           select: {
-            plates: true, serialNumberVehicle: true, occupants: true,
+            plates: true,
+            serialNumberVehicle: true,
+            occupants: true,
             ServiceVehicle: { select: { name: true } },
             Type: { select: { vehicleType: true } },
             Color: { select: { vehicleColor: true } },
-            Model: { select: { year: true, Brand: { select: { name: true } } } }
-          }
+            Model: {
+              select: { year: true, Brand: { select: { name: true } } },
+            },
+          },
         },
-        PolicyService: { select: { name: true, isCovered: true, coveredCost: true } }
-      }
+        PolicyService: {
+          select: { name: true, isCovered: true, coveredCost: true },
+        },
+      },
     });
     return policy;
   }
 
   async cancel(idPolicy: string, idUser: number) {
-    const policy = await this.prisma.policy.findUnique({ where: { serialNumber: idPolicy, idUser: idUser } });
+    const policy = await this.prisma.policy.findUnique({
+      where: { serialNumber: idPolicy, idUser: idUser },
+    });
     if (policy) {
       const cancelPolicy = await this.prisma.policy.update({
         where: { serialNumber: idPolicy },
-        data: { isCanceled: true }
+        data: { isCanceled: true },
       });
       return cancelPolicy.serialNumber;
     }
@@ -252,12 +366,12 @@ export class PoliciesService {
 
   async findAllCurrentTitles(idUser: number) {
     const policies = await this.prisma.policy.groupBy({
-      by: ['planTitle'],
+      by: ["planTitle"],
       where: {
         Driver: {
-          idUser: idUser
-        }
-      }
+          idUser: idUser,
+        },
+      },
     });
 
     return policies;
@@ -266,16 +380,24 @@ export class PoliciesService {
   async vehicleWithValidPolicies(plates: string, idUser: number) {
     const policiesWithPlate = await this.prisma.policy.findMany({
       where: { plates: { equals: plates }, idUser: idUser },
-      select: { startDate: true, yearsPolicy: true, isCanceled: true }
+      select: { startDate: true, yearsPolicy: true, isCanceled: true },
     });
 
     if (policiesWithPlate != null && policiesWithPlate.length > 0) {
       const currentDate = new Date();
 
       const activePolicies = policiesWithPlate.filter((policy) => {
-        const start = new Date(policy.startDate)
-        const endDate = new Date(start.getFullYear() + policy.yearsPolicy, start.getMonth(), start.getDate());
-        const oneMonthAfterToday = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+        const start = new Date(policy.startDate);
+        const endDate = new Date(
+          start.getFullYear() + policy.yearsPolicy,
+          start.getMonth(),
+          start.getDate(),
+        );
+        const oneMonthAfterToday = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          currentDate.getDate(),
+        );
 
         return endDate >= oneMonthAfterToday && !policy.isCanceled;
       });
@@ -305,7 +427,7 @@ export class PoliciesService {
                 Brand: { select: { name: true } },
               },
             },
-            Color: { select: { vehicleColor: true } }
+            Color: { select: { vehicleColor: true } },
           },
         },
       },
@@ -316,15 +438,11 @@ export class PoliciesService {
       const endDate = new Date(
         start.getFullYear() + policy.yearsPolicy,
         start.getMonth(),
-        start.getDate()
+        start.getDate(),
       );
       return endDate >= currentDate;
     });
 
     return activePolicies;
   }
-
-
 }
-
-

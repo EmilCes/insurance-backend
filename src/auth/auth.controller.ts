@@ -1,7 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from 'src/skipAuth.decorator';
-import { JwtAuthGuard } from './jwt.auth.guard';
 import { UsersService } from 'src/users/users.service';
 
 @Controller('auth')
@@ -26,7 +25,7 @@ export class AuthController {
             throw new UnauthorizedException('Wrong authentication code');
         }
 
-        return this.authService.signIn(signInDto.email, signInDto.password, signInDto.code);
+        return this.authService.signIn(signInDto.email, signInDto.password);
     }
 
     @Public()
@@ -55,6 +54,6 @@ export class AuthController {
 
         await this.usersService.turnOnTwoFactorAuthentication(turnOnDto.email);
 
-        return this.authService.firstSignIn(turnOnDto.email, turnOnDto.twoFactorAuthenticationCode);
+        return this.authService.firstSignIn(turnOnDto.email);
     }
 }

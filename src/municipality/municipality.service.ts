@@ -12,10 +12,6 @@ export class MunicipalityService {
       private prisma: PrismaService
     ) { }
 
-  create(createMunicipalityDto: CreateMunicipalityDto) {
-    return 'This action adds a new municipality';
-  }
-
   async findAll() {
     return await this.prisma.municipality.findMany({
       select: {
@@ -26,15 +22,4 @@ export class MunicipalityService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} municipality`;
-  }
-
-  update(id: number, updateMunicipalityDto: UpdateMunicipalityDto) {
-    return `This action updates a #${id} municipality`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} municipality`;
-  }
 }
