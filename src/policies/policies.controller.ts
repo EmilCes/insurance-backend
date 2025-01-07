@@ -19,9 +19,9 @@ import {
 } from "@nestjs/common";
 import { PoliciesService } from "./policies.service";
 import { CreatePolicyDto } from "./dto/create-policy.dto";
-import { RoleDriver } from "src/roleAuth.decorator";
-import { UsersService } from "src/users/users.service";
-import { VehiclesService } from "src/vehicles/vehicles.service";
+import { RoleDriver } from "../roleAuth.decorator";
+import { UsersService } from "../users/users.service";
+import { VehiclesService } from "../vehicles/vehicles.service";
 
 @Controller("policies")
 export class PoliciesController {
@@ -29,7 +29,7 @@ export class PoliciesController {
     private readonly policiesService: PoliciesService,
     private readonly usersService: UsersService,
     private readonly vehiclesService: VehiclesService,
-  ) {}
+  ) { }
 
   @RoleDriver()
   @Post()
@@ -42,12 +42,10 @@ export class PoliciesController {
         req.user.username,
       );
       if (idUser > 0) {
-        const vehicle = await this.vehiclesService.validatePlates(
-          createPolicyDto.plates,
-        );
+        const vehicle = await this.vehiclesService.validatePlates(createPolicyDto.plates);
         if (vehicle) {
           const numberValidPoliciesWithPlates = await this.policiesService
-            .vehicleWithValidPolicies(createPolicyDto.plates, idUser);
+            .vehicleWithValidPolicies(createPolicyDto.plates);
           if (numberValidPoliciesWithPlates > 0) {
             throw new ConflictException("Plates found with a valid policy");
           }
@@ -73,7 +71,6 @@ export class PoliciesController {
       }
       throw new BadRequestException("Error with the request data");
     } catch (err) {
-      console.log(err);
       if (err instanceof HttpException) {
         throw err;
       }

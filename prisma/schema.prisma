@@ -102,10 +102,10 @@ model Policy {
   startDate       DateTime
   planTitle       String          @db.VarChar(30)
   planDescription String          @db.VarChar(255)
-  idPolicyPlan    String
+  idPolicyPlan    String?
   plates          String
   idUser          Int
-  PolicyPlan      PolicyPlan      @relation(fields: [idPolicyPlan], references: [idPolicyPlan])
+  PolicyPlan      PolicyPlan?      @relation(fields: [idPolicyPlan], references: [idPolicyPlan])
   Driver          Driver          @relation(fields: [idUser], references: [idUser])
   Vehicle         Vehicle         @relation(fields: [plates], references: [plates])
   PolicyService   PolicyService[]
@@ -139,6 +139,8 @@ model Account {
   Municipality     Municipality @relation(fields: [idMunicipality], references: [idMunicipality])
   Driver           Driver?      @relation(fields: [idUser], references: [idUser])
   Employee         Employee?
+  secretKey        String       @db.VarChar(100) @default("default_secret_key")
+  twoFactorIsEnabled Boolean @default(false)
 }
 
 model Municipality {

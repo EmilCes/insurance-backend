@@ -64,7 +64,6 @@ export class ReportController {
 
       return { reportNumber: reportNumber };
     } catch (error) {
-      console.log(error);
       throw new UnprocessableEntityException("Error creating report");
     }
   }
@@ -113,10 +112,17 @@ export class ReportController {
 
         const report = await this.reportService.findReportByFilters(filters);
 
+
         if (!report) {
-          throw new NotFoundException(
-            `No se encontró el reporte con número de folio ${reportNumber}`,
-          );
+          return {
+            data: [],
+            pageInfo: {
+              totalItems: 0,
+              totalPages: 0,
+              currentPage: page,
+              itemsPerPage: pageSize,
+            },
+          };
         }
 
         const formattedReport = this.formatReport(report);
@@ -199,6 +205,18 @@ export class ReportController {
 
       const reports = await this.reportService.findReports(filters, skip, pageSize);
 
+      if (!reports || reports.length === 0) {
+        return {
+          data: [],
+          pageInfo: {
+            totalItems: 0,
+            totalPages: 0,
+            currentPage: page,
+            itemsPerPage: pageSize,
+          },
+        };
+      }
+
       const formattedReports = reports.map((report) =>
         this.formatReport(report),
       );
@@ -238,8 +256,6 @@ export class ReportController {
       const username = req.user.username;
       let idUser = 0;
       let idEmployee = 0;
-
-      console.log(role);
 
       if (role === "Conductor") {
         idUser = await this.usersService.getIdUserFromEmail(username);
@@ -345,7 +361,6 @@ export class ReportController {
 
       return { message: "Dictamen actualizado correctamente" };
     } catch (error) {
-      console.error(error);
       if (
         error instanceof BadRequestException ||
         error instanceof NotFoundException ||

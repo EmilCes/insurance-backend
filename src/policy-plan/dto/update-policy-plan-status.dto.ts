@@ -1,6 +1,5 @@
-import { IsString, IsNumber, Length, Matches, IsArray, ValidateNested, Min, Max, IsInt, ArrayMinSize, IsPositive } from 'class-validator';
-import { Type } from 'class-transformer';
-import { Service } from './create-service.dto';
+import { IsInt, IsPositive } from 'class-validator';
+
 export class UpdatePolicyPlanStatusDto {
     @IsInt()
     @IsPositive()

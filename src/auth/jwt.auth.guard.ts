@@ -13,10 +13,15 @@ import {
     IS_DRIVER_KEY,
     IS_SUPPORT_EXECUTIVE_KEY,
 } from "src/roleAuth.decorator";
+import { AuthService } from "./auth.service";
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-    constructor(private jwtService: JwtService, private reflector: Reflector) {}
+    constructor(
+        private jwtService: JwtService,
+        private authService: AuthService,
+        private reflector: Reflector,
+    ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const isPublic = this.reflector.getAllAndOverride<boolean>(
@@ -58,10 +63,11 @@ export class JwtAuthGuard implements CanActivate {
             const currentTime = Date.now();
             const timeUntilExpiration = expirationTime - currentTime;
 
-            /*if (timeUntilExpiration <= 5 * 60 * 1000) {
-              const newToken = this.authService.generateJwt(payload.email, userRole);
-              response.setHeader('New-Access-Token', newToken.token);
-            }*/
+            if (timeUntilExpiration <= 5 * 60 * 1000) {
+                console.log(payload);
+                const newToken = this.authService.generateJwt(payload);
+                response.setHeader("New-Access-Token", newToken);
+            }
 
             return true;
         } catch (error) {
@@ -108,13 +114,10 @@ export class JwtAuthGuard implements CanActivate {
             requiredRoles.push("Administrador");
         }
 
-        console.log("Required roles:", requiredRoles);
-        console.log("User role:", userRole);
-
         if (requiredRoles.length === 0) {
-            return true; // No hay roles requeridos, se permite el acceso
+            return true;
         }
 
-        return requiredRoles.includes(userRole); // Verifica si el rol del usuario está en los roles requeridos
+        return requiredRoles.includes(userRole);
     }
 }

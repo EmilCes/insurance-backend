@@ -137,6 +137,7 @@ CREATE TABLE "Account" (
     "idUser" INTEGER,
     "idEmployee" INTEGER,
     "idMunicipality" INTEGER NOT NULL,
+    "secretKey" VARCHAR(100) NOT NULL DEFAULT 'default_secret_key',
 
     CONSTRAINT "Account_pkey" PRIMARY KEY ("idAccount")
 );
@@ -165,8 +166,8 @@ CREATE TABLE "Report" (
     "date" TIMESTAMP(3) NOT NULL,
     "latitude" DECIMAL(9,6) NOT NULL,
     "longitude" DECIMAL(10,6) NOT NULL,
-    "result" TEXT,
-    "reportDecisionDate" TIMESTAMP(3),
+    "result" TEXT NOT NULL,
+    "reportDecisionDate" TIMESTAMP(3) NOT NULL,
     "idStatus" INTEGER NOT NULL,
     "plates" VARCHAR(15) NOT NULL,
 
@@ -193,10 +194,9 @@ CREATE TABLE "EmployeeType" (
 -- CreateTable
 CREATE TABLE "ImplicateParty" (
     "idImplicateParty" SERIAL NOT NULL,
-    "name" VARCHAR(50),
-    "idModel" INTEGER,
+    "name" VARCHAR(50) NOT NULL,
+    "idModel" INTEGER NOT NULL,
     "idReport" INTEGER NOT NULL,
-    "idColor" INTEGER,
 
     CONSTRAINT "ImplicateParty_pkey" PRIMARY KEY ("idImplicateParty")
 );
@@ -213,7 +213,7 @@ CREATE TABLE "Status" (
 CREATE TABLE "Photograph" (
     "idPhotograph" SERIAL NOT NULL,
     "name" VARCHAR(255) NOT NULL,
-    "url" VARCHAR(255) NOT NULL,
+    "url" BYTEA NOT NULL,
     "idReport" INTEGER NOT NULL,
 
     CONSTRAINT "Photograph_pkey" PRIMARY KEY ("idPhotograph")
@@ -230,9 +230,6 @@ CREATE TABLE "_EmployeeToReport" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "Driver_idUser_key" ON "Driver"("idUser");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_idUser_key" ON "Account"("idUser");
@@ -304,13 +301,10 @@ ALTER TABLE "Employee" ADD CONSTRAINT "Employee_idEmployeeType_fkey" FOREIGN KEY
 ALTER TABLE "Employee" ADD CONSTRAINT "Employee_idEmployee_fkey" FOREIGN KEY ("idEmployee") REFERENCES "Account"("idAccount") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ImplicateParty" ADD CONSTRAINT "ImplicateParty_idModel_fkey" FOREIGN KEY ("idModel") REFERENCES "Model"("idModel") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ImplicateParty" ADD CONSTRAINT "ImplicateParty_idModel_fkey" FOREIGN KEY ("idModel") REFERENCES "Model"("idModel") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ImplicateParty" ADD CONSTRAINT "ImplicateParty_idReport_fkey" FOREIGN KEY ("idReport") REFERENCES "Report"("idReport") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ImplicateParty" ADD CONSTRAINT "ImplicateParty_idColor_fkey" FOREIGN KEY ("idColor") REFERENCES "Color"("idColor") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Photograph" ADD CONSTRAINT "Photograph_idReport_fkey" FOREIGN KEY ("idReport") REFERENCES "Report"("idReport") ON DELETE RESTRICT ON UPDATE CASCADE;

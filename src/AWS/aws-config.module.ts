@@ -1,4 +1,3 @@
-// aws-config.module.ts
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import * as multerS3 from 'multer-s3';
