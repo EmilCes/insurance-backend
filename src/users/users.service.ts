@@ -1,7 +1,10 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from 'src/prisma.service';
+import { equals } from 'class-validator';
+import { drivers } from 'prisma/modelsSeed';
 
 @Injectable()
 export class UsersService {
@@ -10,9 +13,91 @@ export class UsersService {
     private prisma: PrismaService
   ) { }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async updateUserByEmail(email: string, updateData: Partial<UpdateUserDto>) {
+    const user = await this.prisma.account.findFirst({
+      where: { email: email },
+      include: {
+        Driver: true,  
+      },
+    });
+
+    console.log("Email:" + email + " UpdateData: " +updateData + " user: " + user);
+
+    if (!user) {
+      throw new NotFoundException(`Usuario con el correo ${email} no encontrado`);
+    }
+
+    const updatedUser = await this.prisma.account.update({
+      where: { idAccount: user.idAccount },
+      data: {
+        address: updateData.address || user.address,
+        postalCode: updateData.postalCode || user.postalCode,
+        Municipality: {
+          connect: { idMunicipality: +updateData.idMunicipality },
+        }
+      },
+    });
+
+    const updatedDriver = await this.prisma.driver.update({
+      where: { idUser: user.Driver.idUser }, 
+      data: {
+        bankAccountNumber: updateData.bankAccountNumber || user.Driver.bankAccountNumber,
+        expirationDateBankAccount: new Date(`${updateData.expirationDateBankAccount}-01T00:00:00.000Z`) || user.Driver.expirationDateBankAccount,
+        phone: updateData.phone || user.Driver.phone,
+        licenseNumber: updateData.licenseNumber || user.Driver.licenseNumber
+      },
+    });
+
+    return { updatedUser, updatedDriver };
   }
+
+
+  async create(createUserDto: CreateUserDto) {
+    const existingEmail = await this.prisma.account.findFirst({
+      where: { email: createUserDto.email },
+    });
+
+    const existingRfc = await this.prisma.driver.findFirst({
+      where: { rfc: createUserDto.rfc },
+    });
+
+    if (existingEmail) {
+      throw new Error(`El correo electrónico ${createUserDto.email} ya está registrado.`);
+    }
+
+    if (existingRfc) {
+      throw new Error(`El RFC ${createUserDto.rfc} ya está registrado.`);
+    }
+
+    const user = await this.prisma.account.create({
+      data: {
+        name: createUserDto.name,
+        lastName: createUserDto.lastName,
+        datebirth: new Date(createUserDto.datebirth),
+        email: createUserDto.email,
+        password: createUserDto.password,
+        postalCode: createUserDto.postalCode,
+        address: createUserDto.address,
+        registrationDate: new Date(),
+        secretKey: createUserDto.secretKey || 'default_secret_key',
+        Municipality: {
+          connect: { idMunicipality: +createUserDto.idMunicipality },
+        },
+        Driver: {
+          create: {
+            rfc: createUserDto.rfc,
+            bankAccountNumber: createUserDto.bankAccountNumber,
+            expirationDateBankAccount: new Date(`${createUserDto.expirationDateBankAccount}-01T00:00:00.000Z`),
+            licenseNumber: createUserDto.licenseNumber,
+            phone: createUserDto.phone,
+          },
+        },
+      },
+    });
+
+    return user;
+  }
+
 
   findAll() {
     return `This action returns all users`;
@@ -29,11 +114,33 @@ export class UsersService {
 
   async findAccountInfo(email: string) {
     const driverFound = await this.prisma.driver.findFirst({
-      where: { Account: { email: { equals: email }} },
+      where: { Account: { email: { equals: email } } },
       select: { bankAccountNumber: true, expirationDateBankAccount: true }
     })
     return driverFound;
   }
+
+  async findDriverInfo(email: string) {
+    const driverFound = await this.prisma.driver.findFirst({
+      where: {
+        Account: { email: { equals: email } },
+      },
+      include: {
+        Account: {
+          include: {
+            Municipality: {
+              include: {
+                State: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return driverFound;
+  }
+
+
 
   async signIn(email: string) {
     const userFound = await this.prisma.account.findFirst({ where: { email: email } });
@@ -51,6 +158,22 @@ export class UsersService {
     return user?.idUser == undefined ? 0 : user.idUser;
   }
 
+  async getIdUserFromLicenseNumber(licenseNumber: string) {
+    if (licenseNumber == undefined) {
+      return 0;
+    }
+    const user = await this.prisma.driver.findFirst({ where: { licenseNumber: { equals: licenseNumber } }, select: { idUser: true } });
+    return user?.idUser == undefined ? 0 : user.idUser;
+  }
+
+  async getIdUserFromRFC(rfc: string) {
+    if (rfc == undefined) {
+      return 0;
+    }
+    const user = await this.prisma.driver.findFirst({ where: { rfc: { equals: rfc } }, select: { idUser: true } });
+    return user?.idUser == undefined ? 0 : user.idUser;
+  }
+
   async getTypeEmployee(idEmployee: number) {
     const employeeType = await this.prisma.employee.findUnique({
       select: { EmployeeType: { select: { employeeType: true } } },
@@ -60,6 +183,19 @@ export class UsersService {
       throw new NotFoundException(`Empleado no encontrado`);
 
     return employeeType.EmployeeType.employeeType;
+  }
+
+  async saveTwoFactorSecret(email: string, secret: string) {
+    const user = await this.prisma.account.findFirst({ where: { email: { equals: email } } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.prisma.account.update({
+      where: { idAccount: user.idAccount },
+      data: { secretKey: secret },
+    });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

@@ -38,6 +38,7 @@ model Brand {
   idBrand Int     @id @default(autoincrement())
   name    String  @db.VarChar(100)
   Model   Model[]
+  ImplicateParty ImplicateParty[]
 }
 
 model Model {
@@ -46,7 +47,6 @@ model Model {
   idBrand        Int
   Brand          Brand            @relation(fields: [idBrand], references: [idBrand])
   Vehicle        Vehicle[]
-  ImplicateParty ImplicateParty[]
 }
 
 model Color {
@@ -139,6 +139,7 @@ model Account {
   Municipality     Municipality @relation(fields: [idMunicipality], references: [idMunicipality])
   Driver           Driver?      @relation(fields: [idUser], references: [idUser])
   Employee         Employee?
+  secretKey        String       @db.VarChar(100) @default("default_secret_key")
 }
 
 model Municipality {
@@ -157,29 +158,32 @@ model State {
 
 model Report {
   idReport           Int               @id @default(autoincrement())
+  reportNumber       String            @unique @db.VarChar(6)
   description        String            @db.Text
   date               DateTime
   latitude           Decimal           @db.Decimal(9, 6)
   longitude          Decimal           @db.Decimal(10, 6)
-  result             String?            @db.Text
+  result             String?           @db.Text
   reportDecisionDate DateTime?
   idStatus           Int
   plates             String            @db.VarChar(15)
+  driverId           Int
+  assignedEmployeeId Int?
+  Driver             Driver            @relation(fields: [driverId], references: [idUser])     
   Vehicle            Vehicle           @relation(fields: [plates], references: [plates])
   ImplicateParties   ImplicateParty[]
   Photographs        Photograph[]
   Status             Status            @relation(fields: [idStatus], references: [idStatus])
-  Driver             Driver[]
-  Employee           Employee[]
+  AssignedEmployee   Employee?         @relation("EmployeeReports", fields: [assignedEmployeeId], references: [idEmployee])
 }
 
 model Employee {
-  idEmployee     Int          @id @default(autoincrement())
-  employeeNumber Int
-  idEmployeeType Int
-  EmployeeType   EmployeeType @relation(fields: [idEmployeeType], references: [idEmployeeType])
-  Account        Account      @relation(fields: [idEmployee], references: [idAccount])
-  Reports        Report[]
+  idEmployee         Int          @id @default(autoincrement())
+  employeeNumber     Int
+  idEmployeeType     Int
+  EmployeeType       EmployeeType @relation(fields: [idEmployeeType], references: [idEmployeeType])
+  Account            Account      @relation(fields: [idEmployee], references: [idAccount])
+  assignedReports    Report[]     @relation("EmployeeReports")
 }
 
 model EmployeeType {
@@ -191,11 +195,13 @@ model EmployeeType {
 model ImplicateParty {
   idImplicateParty Int     @id @default(autoincrement())
   name             String? @db.VarChar(50)
-  idModel          Int?
-  Model            Model?  @relation(fields: [idModel], references: [idModel])
+  plates           String? @db.VarChar(50)
+  idBrand          Int?
   idReport         Int
-  Report           Report  @relation(fields: [idReport], references: [idReport])
   idColor          Int?
+
+  Brand            Brand?  @relation(fields: [idBrand], references: [idBrand])
+  Report           Report  @relation(fields: [idReport], references: [idReport])
   Color            Color?  @relation(fields: [idColor], references: [idColor])
 }
 

@@ -5,6 +5,9 @@ const prisma = new PrismaClient();
 
 async function main() {
 
+    await prisma.photograph.deleteMany({});
+    await prisma.implicateParty.deleteMany({});
+    await prisma.report.deleteMany({});
     await prisma.policyService.deleteMany({});
     await prisma.policy.deleteMany({});
     await prisma.vehicle.deleteMany({});
@@ -14,14 +17,21 @@ async function main() {
     await prisma.serviceVehicle.deleteMany({});
     await prisma.type.deleteMany({});
     await prisma.color.deleteMany({});
+    await prisma.employee.deleteMany({});
     await prisma.account.deleteMany({});
     await prisma.driver.deleteMany({});
     await prisma.municipality.deleteMany({});
     await prisma.state.deleteMany({});
     await prisma.model.deleteMany({});
     await prisma.brand.deleteMany({});
-    await prisma.employee.deleteMany({});
     await prisma.employeeType.deleteMany({});
+    await prisma.status.deleteMany({});
+
+    for (let item of status) {
+        await prisma.status.create({
+            data: item
+        });
+    }
 
     for (let item of employeeType) {
         await prisma.employeeType.create({
