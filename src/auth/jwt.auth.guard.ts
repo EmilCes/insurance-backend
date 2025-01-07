@@ -114,9 +114,6 @@ export class JwtAuthGuard implements CanActivate {
             requiredRoles.push("Administrador");
         }
 
-        console.log("Required roles:", requiredRoles);
-        console.log("User role:", userRole);
-
         if (requiredRoles.length === 0) {
             return true;
         }
