@@ -38,6 +38,24 @@ export class UsersController {
 
   }
 
+  @RoleDriver()
+  @Get('/account/info')
+  async getAccountInfo(@Request() req) {
+    try {
+      const infoAccount = await this.usersService.findDriverInfo(req.user.username);
+      if (infoAccount != null) {
+        return infoAccount;
+      }
+      throw new BadRequestException("Error with the request data");
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new UnprocessableEntityException("Error creating the policy");
+    }
+
+  }
+
   @Public()
   @Get('/email-exists')
   async checkEmailExists(@Query('email') email: string) {
@@ -115,9 +133,10 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @RoleDriver()
+  @Put(':email')
+  update(@Request() req, @Param('email') email: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateUserByEmail(req.user.username, updateUserDto);
   }
 
   @Delete(':id')
