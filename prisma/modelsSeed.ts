@@ -185,10 +185,10 @@ export const models = [
     { idModel: 2, year: "2019", idBrand: 1 },
     { idModel: 3, year: "2018", idBrand: 1 },
     { idModel: 4, year: "2020", idBrand: 2 },
-    { idModel: 5, year: "2019", idBrand: 2 },*/
+    { idModel: 5, year: "2019", idBrand: 2 },
     { idModel: 6, year: "2021", idBrand: 3 },
     { idModel: 7, year: "2020", idBrand: 4 },
-    { idModel: 8, year: "2022", idBrand: 5 },
+    { idModel: 8, year: "2022", idBrand: 5 },*/
     { idModel: 9, year: "2021", idBrand: 6 },
     { idModel: 10, year: "2022", idBrand: 7 },
     { idModel: 11, year: "2020", idBrand: 8 },
