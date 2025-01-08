@@ -12,7 +12,7 @@ async function bootstrap() {
     allowedHeaders: "Content-Type, Authorization",
   });
 
-  app.useGlobalFilters(new AnyExceptionFilter());
+  //app.useGlobalFilters(new AnyExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -31,4 +31,5 @@ async function bootstrap() {
 
   await app.listen(3002);
 }
+
 bootstrap();

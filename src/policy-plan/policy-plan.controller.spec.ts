@@ -4,7 +4,6 @@ import { PolicyPlanService } from './policy-plan.service';
 import { ValidationService } from './validation.service';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
-import { UpdatePolicyPlanStatusDto } from './dto/update-policy-plan-status.dto';
 import { UnprocessableEntityException, NotFoundException } from '@nestjs/common';
 
 describe('PolicyPlanController', () => {

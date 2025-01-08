@@ -1,8 +1,8 @@
 import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { CreateReportDto } from "./dto/create-report.dto";
-import { PrismaService } from "../prisma.service";
 import { AssignReportDto } from "./dto/assign-report.dto";
 import { UpdateReportDictumDto } from "./dto/update-dictum.dto";
+import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class ReportService {
@@ -13,7 +13,6 @@ export class ReportService {
     files: Express.MulterS3.File[],
     idUser: number,
   ) {
-    console.log(createReportDto);
 
     const policy = await this.prisma.policy.findUnique({
       where: { serialNumber: createReportDto.serialNumber },

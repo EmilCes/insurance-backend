@@ -1,4 +1,4 @@
-import { UnprocessableEntityException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { UnprocessableEntityException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePolicyPlanDto } from './dto/create-policy-plan.dto';
 import { UpdatePolicyPlanDto } from './dto/update-policy-plan.dto';
 import { PrismaService } from '../prisma.service';
@@ -101,6 +101,13 @@ export class PolicyPlanService {
     const policyPlan = await this.prisma.policyPlan.findFirst({ where: { idPolicyPlan: id } });
     if (!policyPlan) {
       throw new NotFoundException("Policy not found")
+    }
+    const policy = await this.prisma.policy.findFirst({ where: { idPolicyPlan: id } });
+    if (policy) {
+      await this.prisma.policy.update({
+        where: { serialNumber: policy.serialNumber },
+        data: { idPolicyPlan: null },
+      });
     }
     const [deleteService, deletePolicyPlan] = await this.prisma.$transaction([
       this.prisma.service.deleteMany({
