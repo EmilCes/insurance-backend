@@ -11,13 +11,65 @@ export const employee = [
 ]
 
 export const state = [
-    { idState: 1, stateName: "Veracruz" },
-    { idState: 2, stateName: "Puebla" }
+    /*{ idState: 1, stateName: "Veracruz" },
+    { idState: 2, stateName: "Puebla" },*/
+    { idState: 3, stateName: "Baja California Sur" },
+    { idState: 4, stateName: "Campeche" },
+    { idState: 5, stateName: "Chiapas" },
+    { idState: 6, stateName: "Chihuahua" },
+    { idState: 7, stateName: "Coahuila" },
+    { idState: 8, stateName: "Colima" },
+    { idState: 9, stateName: "Durango" },
+    { idState: 10, stateName: "Guanajuato" },
+    { idState: 11, stateName: "Guerrero" },
+    { idState: 12, stateName: "Hidalgo" },
+    { idState: 13, stateName: "Jalisco" },
+    { idState: 14, stateName: "Estado de México" },
+    { idState: 15, stateName: "Michoacán" },
+    { idState: 16, stateName: "Morelos" },
+    { idState: 17, stateName: "Nayarit" },
+    { idState: 18, stateName: "Nuevo León" },
+    { idState: 19, stateName: "Oaxaca" },
+    { idState: 21, stateName: "Querétaro" },
+    { idState: 22, stateName: "Quintana Roo" },
+    { idState: 23, stateName: "San Luis Potosí" },
+    { idState: 24, stateName: "Sinaloa" },
+    { idState: 25, stateName: "Sonora" },
+    { idState: 26, stateName: "Tabasco" },
+    { idState: 27, stateName: "Tamaulipas" },
+    { idState: 28, stateName: "Tlaxcala" },
+    { idState: 30, stateName: "Yucatán" },
+    { idState: 31, stateName: "Zacatecas" },
+    { idState: 32, stateName: "Ciudad de México" }
 ]
 
 export const municipality = [
-    { idMunicipality: 1, municipalityName: "Xalapa", idState: 1 },
-    { idMunicipality: 2, municipalityName: "Puebla", idState: 2 }
+    /*{ idMunicipality: 1, municipalityName: "Xalapa", idState: 1 },
+    { idMunicipality: 2, municipalityName: "Puebla", idState: 2 },*/
+    { idMunicipality: 3, municipalityName: "Cancún", idState: 22 },
+    { idMunicipality: 4, municipalityName: "Guadalajara", idState: 13 },
+    { idMunicipality: 5, municipalityName: "Monterrey", idState: 18 },
+    { idMunicipality: 7, municipalityName: "Mérida", idState: 30 },
+    { idMunicipality: 8, municipalityName: "Morelia", idState: 15 },
+    { idMunicipality: 9, municipalityName: "Culiacán", idState: 24 },
+    { idMunicipality: 10, municipalityName: "Saltillo", idState: 7 },
+    { idMunicipality: 11, municipalityName: "Durango", idState: 9 },
+    { idMunicipality: 13, municipalityName: "Campeche", idState: 4 },
+    { idMunicipality: 14, municipalityName: "Chihuahua", idState: 6 },
+    { idMunicipality: 15, municipalityName: "Villahermosa", idState: 26 },
+    { idMunicipality: 16, municipalityName: "Zacatecas", idState: 31 },
+    { idMunicipality: 17, municipalityName: "Colima", idState: 8 },
+    { idMunicipality: 18, municipalityName: "Oaxaca de Juárez", idState: 19 },
+    { idMunicipality: 19, municipalityName: "Querétaro", idState: 21 },
+    { idMunicipality: 20, municipalityName: "San Luis Potosí", idState: 23 },
+    { idMunicipality: 21, municipalityName: "Hermosillo", idState: 25 },
+    { idMunicipality: 22, municipalityName: "Tlaxcala", idState: 28 },
+    { idMunicipality: 23, municipalityName: "Ciudad de México", idState: 32 },
+    { idMunicipality: 24, municipalityName: "Tuxtla Gutiérrez", idState: 5 },
+    { idMunicipality: 25, municipalityName: "Acapulco", idState: 11 },
+    { idMunicipality: 26, municipalityName: "Irapuato", idState: 10 },
+    { idMunicipality: 27, municipalityName: "Toluca", idState: 14 },
+    { idMunicipality: 28, municipalityName: "Cuernavaca", idState: 16 },
 ]
 
 export const drivers = [
@@ -74,8 +126,8 @@ export const serviceVehicle = [
 ]
 
 export const status = [
-    { idStatus: 1, statusType: "Pendiente"},
-    { idStatus: 2, statusType: "Dictaminado"},
+    { idStatus: 1, statusType: "Pendiente" },
+    { idStatus: 2, statusType: "Dictaminado" },
 ]
 
 export const policyPlanStatus = [
@@ -116,22 +168,34 @@ export const policyPlansServices = [
 ]
 
 export const brands = [
-    { idBrand: 1, name: "BMW" },
+    /*{ idBrand: 1, name: "BMW" },
     { idBrand: 2, name: "Ford" },
     { idBrand: 3, name: "Suzuki" },
     { idBrand: 4, name: "Saturn" },
-    { idBrand: 5, name: "Nissan" }
-]
+    { idBrand: 5, name: "Nissan" },*/
+    { idBrand: 6, name: "Chevrolet" },
+    { idBrand: 7, name: "Toyota" },
+    { idBrand: 8, name: "Honda" },
+    { idBrand: 9, name: "Kia" },
+    { idBrand: 10, name: "Volkswagen" }
+];
 
 export const models = [
-    { idModel: 1, year: "2020", idBrand: 1 },
-    { idModel: 6, year: "2019", idBrand: 1 },
-    { idModel: 7, year: "2018", idBrand: 1 },
-    { idModel: 2, year: "2020", idBrand: 2 },
-    { idModel: 3, year: "2020", idBrand: 3 },
-    { idModel: 4, year: "2020", idBrand: 4 },
-    { idModel: 5, year: "2020", idBrand: 5 }
-]
+    /*{ idModel: 1, year: "2020", idBrand: 1 },
+    { idModel: 2, year: "2019", idBrand: 1 },
+    { idModel: 3, year: "2018", idBrand: 1 },
+    { idModel: 4, year: "2020", idBrand: 2 },
+    { idModel: 5, year: "2019", idBrand: 2 },*/
+    { idModel: 6, year: "2021", idBrand: 3 },
+    { idModel: 7, year: "2020", idBrand: 4 },
+    { idModel: 8, year: "2022", idBrand: 5 },
+    { idModel: 9, year: "2021", idBrand: 6 },
+    { idModel: 10, year: "2022", idBrand: 7 },
+    { idModel: 11, year: "2020", idBrand: 8 },
+    { idModel: 12, year: "2019", idBrand: 9 },
+    { idModel: 13, year: "2021", idBrand: 10 }
+];
+
 
 export const vehicle = [
     { plates: "AAA-01-01", serialNumberVehicle: "97232176545678", occupants: 3, idService: 1, idType: 1, idModel: 1, idColor: 1 }
@@ -146,47 +210,44 @@ export const policies = [
 ]
 
 export const policyServices = [
-    {  idPolicyService: 1, name: "Daños materiales", isCovered: false, coveredCost: 3000, serialNumber: "0cafd594-2186-4f3a-851d-9ef334e3acaa"},
-    {  idPolicyService: 2, name: "Robo total", isCovered: false, coveredCost: 4000, serialNumber: "0cafd594-2186-4f3a-851d-9ef334e3acaa"}
+    { idPolicyService: 1, name: "Daños materiales", isCovered: false, coveredCost: 3000, serialNumber: "0cafd594-2186-4f3a-851d-9ef334e3acaa" },
+    { idPolicyService: 2, name: "Robo total", isCovered: false, coveredCost: 4000, serialNumber: "0cafd594-2186-4f3a-851d-9ef334e3acaa" }
 ]
 
 export const reports = [
     {
-      reportNumber: "REP001",
-      description: "Accidente menor en cruce",
-      date: new Date("2024-01-01T10:00:00"),
-      latitude: 19.432608,
-      longitude: -99.133209,
-      idStatus: 1, // Pendiente
-      plates: "AAA-01-01", // Relacionado con un vehículo existente
-      driverId: 1, // Relacionado con un conductor existente
-      assignedEmployeeId: null, // No asignado aún
+        reportNumber: "REP001",
+        description: "Accidente menor en cruce",
+        date: new Date("2024-01-01T10:00:00"),
+        latitude: 19.432608,
+        longitude: -99.133209,
+        idStatus: 1, // Pendiente
+        plates: "AAA-01-01", // Relacionado con un vehículo existente
+        driverId: 1, // Relacionado con un conductor existente
+        assignedEmployeeId: null, // No asignado aún
     },
     {
-      reportNumber: "REP002",
-      description: "Colisión múltiple en avenida principal",
-      date: new Date("2024-01-02T11:30:00"),
-      latitude: 19.433700,
-      longitude: -99.134500,
-      idStatus: 1, // Pendiente
-      plates: "AAA-01-01", // Relacionado con el mismo vehículo
-      driverId: 1, // Relacionado con el mismo conductor
-      assignedEmployeeId: null, // No asignado aún
+        reportNumber: "REP002",
+        description: "Colisión múltiple en avenida principal",
+        date: new Date("2024-01-02T11:30:00"),
+        latitude: 19.433700,
+        longitude: -99.134500,
+        idStatus: 1, // Pendiente
+        plates: "AAA-01-01", // Relacionado con el mismo vehículo
+        driverId: 1, // Relacionado con el mismo conductor
+        assignedEmployeeId: null, // No asignado aún
     },
-  ];
+];
 
-  export const photographs = [
+export const photographs = [
     {
-      name: "Foto 1",
-      url: "https://example.com/foto1.jpg",
-      idReport: "REP001", // Vinculado al `reportNumber` del primer reporte
+        name: "Foto 1",
+        url: "https://example.com/foto1.jpg",
+        idReport: "REP001", // Vinculado al `reportNumber` del primer reporte
     },
     {
-      name: "Foto 2",
-      url: "https://example.com/foto2.jpg",
-      idReport: "REP002", // Vinculado al `reportNumber` del segundo reporte
+        name: "Foto 2",
+        url: "https://example.com/foto2.jpg",
+        idReport: "REP002", // Vinculado al `reportNumber` del segundo reporte
     },
-  ];
-  
-  
-  
+];

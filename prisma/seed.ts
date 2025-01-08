@@ -5,7 +5,32 @@ const prisma = new PrismaClient();
 
 async function main() {
 
-    await prisma.photograph.deleteMany({});
+    
+    for (let item of brands) {
+        await prisma.brand.create({
+            data: item,
+        });
+    }
+
+    for (let item of models) {
+        await prisma.model.create({
+            data: item,
+        });
+    }
+
+    for (let item of state) {
+        await prisma.state.create({
+            data: item,
+        });
+    }
+
+    for (let item of municipality) {
+        await prisma.municipality.create({
+            data: item,
+        });
+    }
+
+    /*await prisma.photograph.deleteMany({});
     await prisma.implicateParty.deleteMany({});
     await prisma.report.deleteMany({});
     await prisma.policyService.deleteMany({});
@@ -141,7 +166,7 @@ for (let item of reports) {
     });
   }
   
-  // Crear fotografías (opcional
+  // Crear fotografías (opcional*/
 }
 
 main()
