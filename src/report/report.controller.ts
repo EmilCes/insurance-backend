@@ -310,7 +310,7 @@ export class ReportController {
       throw new InternalServerErrorException("Error al obtener el reporte");
     }
   }
-
+    
   @Put(":reportNumber/assign")
   @RoleSupportExecutive()
   async assignReport(
@@ -321,9 +321,9 @@ export class ReportController {
   }
 
   @Get('available-adjusters')
-  @RoleSupportExecutive() // Si aplica alguna validación de rol
+  @RoleSupportExecutive()
   async getAvailableAdjusters() {
-    return this.reportService.getAvailableAdjusters();
+    return await this.reportService.getAvailableAdjusters();
   }
   
 
