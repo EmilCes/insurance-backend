@@ -5,12 +5,6 @@ const prisma = new PrismaClient();
 
 async function main() {
 
-    
-    for (let item of brands) {
-        await prisma.brand.create({
-            data: item,
-        });
-    }
 
     for (let item of models) {
         await prisma.model.create({
