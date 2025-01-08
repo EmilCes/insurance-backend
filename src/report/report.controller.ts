@@ -68,38 +68,36 @@ export class ReportController {
     }
   }
 
-  
-
   @Get()
   @RoleDriver()
   @RoleAdjuster()
   @RoleSupportExecutive()
   async getReports(@Request() req, @Query() query: ReportFilterDto) {
     const { page = 0, status, reportNumber, startYear, endYear } = query;
- 
+
     let idUser = 0;
     let idEmployee = 0;
     const role = req.user.role;
- 
+
     if (role === "Conductor") {
       idUser = await this.usersService.getIdUserFromEmail(req.user.username);
     } else if (role === "Ajustador" || role === "Ejecutivo de asistencia") {
       idEmployee = await this.employeeService.getIdEmployeeFromEmail(
-        req.user.username
+        req.user.username,
       );
     }
- 
+
     if (idUser <= 0 && idEmployee <= 0) {
-      console.log(0);
       throw new BadRequestException("Error with the request data");
     }
- 
+
     try {
       const pageSize = 3;
- 
+
+      // Filtrar por número de reporte específico
       if (reportNumber !== undefined) {
         const filters: any = { reportNumber };
- 
+
         if (role === "Conductor") {
           filters.driverId = idUser;
         } else if (role === "Ajustador" || role === "Ejecutivo de asistencia") {
@@ -109,21 +107,17 @@ export class ReportController {
             },
           };
         }
- 
-        filters.reportNumber = reportNumber;
- 
-        const report = await this.reportService.findReportByFilters(
-          filters,
-        );
- 
+
+        const report = await this.reportService.findReportByFilters(filters);
+
         if (!report) {
           throw new NotFoundException(
-            `No se encontro el reporte con numero de folio ${reportNumber}`,
+            `No se encontró el reporte con número de folio ${reportNumber}`,
           );
         }
- 
+
         const formattedReport = this.formatReport(report);
- 
+
         return {
           data: [formattedReport],
           pageInfo: {
@@ -134,57 +128,81 @@ export class ReportController {
           },
         };
       }
- 
+
       const filters: any = {};
- 
+
+      // Filtrar por estado (status)
       if (status && status !== 0) {
         filters.idStatus = status;
       }
- 
+
+      // Filtrar por rango de fechas
       if ((startYear && !endYear) || (!startYear && endYear)) {
         throw new BadRequestException(
           "Debes proporcionar el año de inicio y fin",
         );
       }
- 
+
       if (startYear && endYear) {
         if (startYear > endYear) {
           throw new BadRequestException(
             "El año de inicio no puede ser mayor al año de fin",
           );
         }
- 
+
         const startDate = new Date(`${startYear}-01-01T00:00:00.000Z`);
         const endDate = new Date(`${endYear}-12-31T23:59:59.999Z`);
- 
+
         filters.date = { gte: startDate, lte: endDate };
       }
- 
+
+      // Lógica para cada rol
       if (role === "Conductor") {
         filters.driverId = idUser;
       } else if (role === "Ajustador") {
-        filters.AssignedEmployee = {
-          is: {
-            idEmployee: idEmployee,
+        // Ajustador: reportes asignados a sí mismo o no asignados
+        filters.OR = [
+          { AssignedEmployee: { is: { idEmployee: idEmployee } } },
+        ];
+      } else if (role === "Ejecutivo de asistencia") {
+        // Ejecutivo de asistencia: solo reportes no asignados y campos específicos
+        filters.AssignedEmployee = null;
+
+        const reports = await this.reportService.findReportsForSupportExecutive(
+          filters,
+          page * pageSize,
+          pageSize,
+        );
+
+        const totalCount = await this.reportService.countReports(filters);
+        const totalPages = Math.ceil(totalCount / pageSize);
+
+        return {
+          data: reports,
+          pageInfo: {
+            totalItems: totalCount,
+            totalPages: totalPages,
+            currentPage: page,
+            itemsPerPage: pageSize,
           },
         };
       }
- 
+
       const skip = page * pageSize;
- 
+
       const totalCount = await this.reportService.countReports(filters);
       const totalPages = Math.ceil(totalCount / pageSize);
- 
+
       const reports = await this.reportService.findReports(
         filters,
         skip,
         pageSize,
       );
- 
+
       const formattedReports = reports.map((report) =>
         this.formatReport(report)
       );
- 
+
       return {
         data: formattedReports,
         pageInfo: {
@@ -203,7 +221,7 @@ export class ReportController {
       ) {
         throw error;
       }
- 
+
       throw new InternalServerErrorException("Error al obtener reportes");
     }
   }
@@ -274,7 +292,7 @@ export class ReportController {
       throw new InternalServerErrorException("Error al obtener el reporte");
     }
   }
-    
+
   @Put(":reportNumber/assign")
   @RoleSupportExecutive()
   async assignReport(
@@ -284,13 +302,11 @@ export class ReportController {
     return this.reportService.assignReport(reportNumber, assignReportDto);
   }
 
-  @Get('available-adjusters')
+  @Get("available-adjusters")
   @RoleSupportExecutive()
   async getAvailableAdjusters() {
     return await this.reportService.getAvailableAdjusters();
   }
-  
-
 
   @Put(":reportNumber/dictum")
   @RoleAdjuster()
@@ -406,6 +422,4 @@ export class ReportController {
         : null,
     };
   }
-
-
 }
