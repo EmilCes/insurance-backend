@@ -40,7 +40,7 @@ describe('EmployeeService', () => {
       const result = await service.getIdEmployeeFromEmail('test@example.com');
       expect(result).toBe(1);
       expect(prisma.account.findFirst).toHaveBeenCalledWith({
-        where: { email: { equals: 'test@example.com' } },
+        where: { email: 'test@example.com' }, // Corregido para que coincida con el servicio
         select: { idEmployee: true },
       });
     });
