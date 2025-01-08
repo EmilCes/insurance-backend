@@ -117,22 +117,70 @@ export class EmployeeService {
     return employee;
   }
 
-  async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
-    const employee = await this.prisma.employee.findUnique({
-      where: { idEmployee: id },
-    });
+  
+async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
+  // Verificar si el empleado existe
+  const existingEmployee = await this.prisma.employee.findUnique({
+    where: { idEmployee: id },
+    include: { Account: true }, // Incluir datos relacionados de la cuenta
+  });
 
-    if (!employee) {
-      throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
-    }
-
-    return this.prisma.employee.update({
-      where: { idEmployee: id },
-      data: {
-        ...updateEmployeeDto,
-      },
-    });
+  if (!existingEmployee) {
+    throw new NotFoundException(`Empleado con ID ${id} no encontrado.`);
   }
+
+  // Actualizar los datos de la cuenta del empleado
+  const { password, ...accountData } = updateEmployeeDto;
+
+  await this.prisma.account.update({
+    where: { idAccount: existingEmployee.Account.idAccount },
+    data: {
+      name: accountData.name,
+      lastName: accountData.lastName,
+      datebirth: accountData.dateOfBirth ? new Date(accountData.dateOfBirth) : undefined,
+      email: accountData.email,
+      password: password, // Actualizar solo si existe una nueva contraseña
+      postalCode: accountData.postalCode,
+      address: accountData.address,
+      Municipality: accountData.idMunicipality
+        ? { connect: { idMunicipality: accountData.idMunicipality } }
+        : undefined,
+    },
+  });
+
+  return {
+    message: 'Empleado actualizado con éxito',
+  };
+}
+
+async findEmployeeInfo(email: string) {
+  const employee = await this.prisma.employee.findFirst({
+    where: { Account: { email } }, // Usar la relación con Account para encontrar el empleado
+    include: {
+      Account: true, // Incluir la información de la cuenta
+      EmployeeType: true, // Incluir el tipo de empleado
+    },
+  });
+
+  if (!employee) {
+    throw new NotFoundException("Empleado no encontrado");
+  }
+
+  // Formatear la respuesta con la información relevante
+  return {
+    idEmployee: employee.idEmployee,
+    name: employee.Account.name,
+    lastName: employee.Account.lastName,
+    email: employee.Account.email,
+    address: employee.Account.address,
+    postalCode: employee.Account.postalCode,
+    dateOfBirth: employee.Account.datebirth,
+    employeeType: employee.EmployeeType.employeeType,
+    employeeNumber: employee.employeeNumber,
+    municipality: employee.Account.idMunicipality, // Si quieres incluir el nombre del municipio
+  };
+}
+
 
   async remove(id: number) {
     const employee = await this.prisma.employee.findUnique({
