@@ -340,13 +340,12 @@ export class ReportService {
   }
   async getAvailableAdjusters() {
     try {
-      // Recuperar empleados del tipo "Ajustador" que no tengan reportes pendientes
       const availableAdjusters = await this.prisma.employee.findMany({
         where: {
-          idEmployeeType: 3, // Solo ajustadores
+          idEmployeeType: 3,
           assignedReports: {
             none: {
-              idStatus: { not: 3 }, // Excluir ajustadores con reportes que no están en estado "resuelto"
+              idStatus: { not: 3 },
             },
           },
         },
@@ -361,7 +360,6 @@ export class ReportService {
         },
       });
   
-      // Formatear los datos
       return availableAdjusters.map((adjuster) => ({
         id: adjuster.idEmployee,
         name: `${adjuster.Account?.name} ${adjuster.Account?.lastName}`,

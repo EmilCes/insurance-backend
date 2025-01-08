@@ -186,7 +186,7 @@ export class PoliciesController {
         );
 
       if (activePolicies.length === 0) {
-        throw new NotFoundException("No active policies found for the user");
+      return [];
       }
 
       return activePolicies;
