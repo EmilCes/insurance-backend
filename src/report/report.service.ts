@@ -345,7 +345,7 @@ export class ReportService {
           idEmployeeType: 3,
           assignedReports: {
             none: {
-              idStatus: { not: 3 },
+              idStatus: { not: 2 },
             },
           },
         },
